@@ -27,4 +27,4 @@ jobs:
           platformio check
       - name: Build
         run: |
-          platformio run -e debug
+          platformio run
