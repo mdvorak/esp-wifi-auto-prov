@@ -1,11 +1,14 @@
 #include <esp_log.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include "lib.h"
 
 static const char TAG[] = "example";
 
 void setup()
 {
+	lib_example();
+
 	// Setup complete
 	ESP_LOGI(TAG, "started");
 }

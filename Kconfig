@@ -1,0 +1,8 @@
+# Custom component config
+menu "esp-lib-template"
+    config LIB_EXAMPLE
+        int "Example variable"
+        default 0
+        help
+            Just example, remove this.
+endmenu
