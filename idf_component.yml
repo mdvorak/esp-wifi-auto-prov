@@ -1,4 +1,4 @@
-name: "esp-lib-template"
+name: "lib_template"
 description: TODO description.
 url: https://github.com/mdvorak-iot/esp-lib-template.git
 targets:
