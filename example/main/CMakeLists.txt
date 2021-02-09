@@ -1,5 +1,5 @@
 idf_component_register(
     SRC_DIRS .
     INCLUDE_DIRS .
-    REQUIRES esp-lib-template
+    REQUIRES freertos log esp-lib-template
 )

@@ -1,5 +1,8 @@
 name: "esp-lib-template"
-
-version: "0.0.0"
-
-description: TODO.
+description: TODO description.
+url: https://github.com/mdvorak-iot/esp-lib-template.git
+targets:
+  - esp32
+dependencies:
+  idf:
+    version: ">=4.1"
