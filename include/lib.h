@@ -2,12 +2,11 @@
 #define TODO_H
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-	// TODO
-	void lib_example();
+// TODO
+void lib_example();
 
 #ifdef __cplusplus
 }
