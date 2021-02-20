@@ -1,5 +1,5 @@
-#ifndef TODO_H
-#define TODO_H
+#ifndef TODO_H_
+#define TODO_H_
 
 #ifdef __cplusplus
 extern "C" {
