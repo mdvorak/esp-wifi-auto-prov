@@ -13,9 +13,11 @@
 
 static const char TAG[] = "app_wifi";
 
+#define POP_LEN 9
+
 static esp_timer_handle_t wifi_prov_timeout_timer = NULL;
 static wifi_config_t startup_wifi_config = {};
-static char pop[9] = {};
+static char *pop = NULL;
 
 static void wifi_prov_timeout_timer_delete()
 {
@@ -55,6 +57,11 @@ static void wifi_prov_event_handler(__unused void *arg, __unused esp_event_base_
     case WIFI_PROV_CRED_SUCCESS:
         ESP_LOGI(TAG, "provisioning successful");
         break;
+    case WIFI_PROV_DEINIT:
+        // Release PoP
+        free(pop);
+        pop = NULL;
+        break;
     case WIFI_PROV_END: {
         ESP_LOGI(TAG, "provisioning end");
         wifi_prov_timeout_timer_delete();
@@ -91,7 +98,8 @@ static esp_err_t device_pop_init()
     esp_err_t err = esp_wifi_get_mac(WIFI_IF_STA, eth_mac);
     if (err == ESP_OK)
     {
-        snprintf(pop, sizeof(pop), "%02x%02x%02x%02x", eth_mac[2], eth_mac[3], eth_mac[4], eth_mac[5]);
+        pop = calloc(POP_LEN, sizeof(char));
+        snprintf(pop, POP_LEN, "%02x%02x%02x%02x", eth_mac[2], eth_mac[3], eth_mac[4], eth_mac[5]);
         return ESP_OK;
     }
     return err;
@@ -114,10 +122,6 @@ esp_err_t app_wifi_init(const char *hostname)
     {
         ESP_ERROR_CHECK(tcpip_adapter_set_hostname(TCPIP_ADAPTER_IF_STA, hostname));
     }
-
-    // Proof of possession
-    // NOTE this uses atm MAC, which is stable, and QR code can be printed on the device
-    ESP_ERROR_CHECK(device_pop_init());
 
     // Store original STA config, so it can be used on provisioning timeout
     // Note: This is needed, since wifi stack is unable to re-read correct config from NVS after provisioning for some reason
@@ -155,8 +159,13 @@ esp_err_t app_wifi_start(bool force_provisioning)
         // Provisioning mode
         ESP_LOGI(TAG, "provisioning starting, timeout %d s", APP_WIFI_PROV_TIMEOUT_S);
 
+        // Extract hostname
         const char *hostname = NULL;
         ESP_ERROR_CHECK_WITHOUT_ABORT(tcpip_adapter_get_hostname(TCPIP_ADAPTER_IF_STA, &hostname));
+
+        // Proof of possession
+        // NOTE this uses atm MAC, which is stable, and QR code can be printed on the device
+        ESP_ERROR_CHECK(device_pop_init());
 
         // Service name
         char service_name[65] = {}; // Note: only first 29 chars will be probably broadcast
