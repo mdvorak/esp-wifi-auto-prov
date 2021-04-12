@@ -1,6 +1,6 @@
-name: "lib_template"
-description: TODO description.
-url: https://github.com/mdvorak-iot/esp-lib-template.git
+name: "app_wifi"
+description: WiFi setup and provisioning.
+url: https://github.com/mdvorak-iot/esp-app-wifi.git
 targets:
   - esp32
 dependencies:

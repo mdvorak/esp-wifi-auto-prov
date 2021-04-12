@@ -1,10 +1,10 @@
 {
-    "name": "esp-lib-template",
-    "description": "TODO",
+    "name": "esp-app-wifi",
+    "description": "WiFi setup and provisioning.",
     "keywords": "esp esp32",
     "repository": {
         "type": "git",
-        "url": "https://github.com/mdvorak-iot/esp-lib-template.git"
+        "url": "https://github.com/mdvorak-iot/esp-app-wifi.git"
     },
     "authors": [
         {

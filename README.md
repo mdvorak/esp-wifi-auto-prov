@@ -1,5 +1,5 @@
-# esp-lib-template
+# esp-app-wifi
 
-![platformio build](https://github.com/mdvorak-iot/esp-lib-template/workflows/platformio%20build/badge.svg)
+![platformio build](https://github.com/mdvorak-iot/esp-app-wifi/workflows/platformio%20build/badge.svg)
 
-TODO Description
+WiFi setup and provisioning.
