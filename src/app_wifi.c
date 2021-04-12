@@ -159,17 +159,13 @@ esp_err_t app_wifi_start(bool force_provisioning)
         // Provisioning mode
         ESP_LOGI(TAG, "provisioning starting, timeout %d s", APP_WIFI_PROV_TIMEOUT_S);
 
-        // Extract hostname
-        const char *hostname = NULL;
-        ESP_ERROR_CHECK_WITHOUT_ABORT(tcpip_adapter_get_hostname(TCPIP_ADAPTER_IF_STA, &hostname));
-
         // Proof of possession
         // NOTE this uses atm MAC, which is stable, and QR code can be printed on the device
         ESP_ERROR_CHECK(device_pop_init());
 
         // Service name
-        char service_name[65] = {}; // Note: only first 29 chars will be probably broadcast
-        snprintf(service_name, sizeof(service_name), "PROV_%s", hostname);
+        char service_name[14] = {};
+        snprintf(service_name, sizeof(service_name), "PROV_%x", esp_random());
         ESP_LOGI(TAG, "service name: %s", service_name);
 
         // Start
@@ -177,7 +173,7 @@ esp_err_t app_wifi_start(bool force_provisioning)
 
         esp_timer_create_args_t args = {
             .callback = wifi_prov_timeout_handler,
-            .name = "wifi_prov_timeout_timer",
+            .name = "wifi_prov_timeout",
         };
         ESP_ERROR_CHECK(esp_timer_create(&args, &wifi_prov_timeout_timer));
         ESP_ERROR_CHECK(esp_timer_start_once(wifi_prov_timeout_timer, APP_WIFI_PROV_TIMEOUT_S * 1000000));
