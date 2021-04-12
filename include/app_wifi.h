@@ -2,6 +2,7 @@
 
 #include <esp_err.h>
 #include <stdbool.h>
+#include <wifi_provisioning/manager.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -9,7 +10,7 @@ extern "C" {
 
 esp_err_t app_wifi_init(const char *hostname);
 
-esp_err_t app_wifi_start(bool force_provisioning);
+esp_err_t app_wifi_start(wifi_prov_security_t security, bool force_provisioning);
 
 const char *app_wifi_get_pop();
 

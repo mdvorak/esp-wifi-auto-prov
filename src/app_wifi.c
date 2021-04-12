@@ -136,7 +136,7 @@ esp_err_t app_wifi_init(const char *hostname)
     return ESP_OK;
 }
 
-esp_err_t app_wifi_start(bool force_provisioning)
+esp_err_t app_wifi_start(wifi_prov_security_t security, bool force_provisioning)
 {
     // Initialize provisioning
     wifi_prov_mgr_config_t wifi_prof_cfg = {
@@ -159,9 +159,12 @@ esp_err_t app_wifi_start(bool force_provisioning)
         // Provisioning mode
         ESP_LOGI(TAG, "provisioning starting, timeout %d s", APP_WIFI_PROV_TIMEOUT_S);
 
-        // Proof of possession
-        // NOTE this uses atm MAC, which is stable, and QR code can be printed on the device
-        ESP_ERROR_CHECK(device_pop_init());
+        if (security != WIFI_PROV_SECURITY_0)
+        {
+            // Proof of possession
+            // NOTE this uses atm MAC, which is stable, and QR code can be printed on the device
+            ESP_ERROR_CHECK(device_pop_init());
+        }
 
         // Service name
         char service_name[14] = {};
@@ -169,7 +172,7 @@ esp_err_t app_wifi_start(bool force_provisioning)
         ESP_LOGI(TAG, "service name: %s", service_name);
 
         // Start
-        ESP_ERROR_CHECK(wifi_prov_mgr_start_provisioning(WIFI_PROV_SECURITY_1, pop, service_name, NULL));
+        ESP_ERROR_CHECK(wifi_prov_mgr_start_provisioning(security, pop, service_name, NULL));
 
         esp_timer_create_args_t args = {
             .callback = wifi_prov_timeout_handler,
