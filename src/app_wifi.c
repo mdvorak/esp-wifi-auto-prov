@@ -211,7 +211,7 @@ esp_err_t app_wifi_start(bool force_provisioning)
     if (!provisioned || force_provisioning)
     {
         // Provisioning mode
-        ESP_LOGI(TAG, "provisioning starting, timeout %d s", APP_WIFI_PROV_TIMEOUT_S);
+        ESP_LOGI(TAG, "provisioning starting, timeout %d s%s", APP_WIFI_PROV_TIMEOUT_S, force_provisioning ? " (forced)" : "");
 
         if (security != WIFI_PROV_SECURITY_0)
         {
