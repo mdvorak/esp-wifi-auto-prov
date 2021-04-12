@@ -30,7 +30,10 @@ void app_main()
     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_PROV_EVENT, WIFI_PROV_START, &print_pop_handler, NULL, NULL));
 
     // Setup WiFi
-    ESP_ERROR_CHECK(app_wifi_init(NULL));
+    struct app_wifi_config wifi_cfg = {
+        .security = WIFI_PROV_SECURITY_1,
+    };
+    ESP_ERROR_CHECK(app_wifi_init(&wifi_cfg));
     ESP_ERROR_CHECK(app_wifi_start(true));
 
     // Setup complete

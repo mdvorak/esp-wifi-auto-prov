@@ -18,6 +18,7 @@ static const char TAG[] = "app_wifi";
 
 static esp_timer_handle_t wifi_prov_timeout_timer = NULL;
 static wifi_config_t startup_wifi_config = {};
+static wifi_prov_security_t security;
 static char *pop = NULL;
 static char *service_name = NULL;
 
@@ -131,8 +132,13 @@ static esp_err_t service_name_init()
     return ESP_OK;
 }
 
-esp_err_t app_wifi_init(const char *hostname)
+esp_err_t app_wifi_init(const struct app_wifi_config *config)
 {
+    if (!config)
+    {
+        return ESP_ERR_INVALID_ARG;
+    }
+
     // Initialize WiFi
     ESP_ERROR_CHECK(esp_netif_init());
     esp_netif_create_default_wifi_sta();
@@ -141,12 +147,22 @@ esp_err_t app_wifi_init(const char *hostname)
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
     ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_FLASH));
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-    ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_MAX_MODEM));
 
     // Hostname
-    if (hostname != NULL)
+    if (config->hostname != NULL)
     {
-        ESP_ERROR_CHECK(tcpip_adapter_set_hostname(TCPIP_ADAPTER_IF_STA, hostname));
+        ESP_ERROR_CHECK(tcpip_adapter_set_hostname(TCPIP_ADAPTER_IF_STA, config->hostname));
+    }
+
+    // Copy provision params
+    security = config->security;
+    if (config->service_name)
+    {
+        service_name = strdup(config->service_name);
+    }
+    if (config->pop)
+    {
+        pop = strdup(config->pop);
     }
 
     // Store original STA config, so it can be used on provisioning timeout
@@ -162,7 +178,7 @@ esp_err_t app_wifi_init(const char *hostname)
     return ESP_OK;
 }
 
-esp_err_t app_wifi_start(wifi_prov_security_t security, bool force_provisioning)
+esp_err_t app_wifi_start(bool force_provisioning)
 {
     // Initialize provisioning
     wifi_prov_mgr_config_t wifi_prof_cfg = {
@@ -225,27 +241,7 @@ const char *app_wifi_get_prov_pop()
     return pop;
 }
 
-void app_wifi_set_prov_pop(const char *value)
-{
-    if (pop)
-    {
-        free(pop);
-    }
-
-    pop = value ? strdup(value) : NULL;
-}
-
 const char *app_wifi_prov_get_service_name()
 {
     return service_name;
-}
-
-void app_wifi_prov_set_service_name(const char *name)
-{
-    if (service_name)
-    {
-        free(service_name);
-    }
-
-    service_name = name ? strdup(name) : NULL;
 }
