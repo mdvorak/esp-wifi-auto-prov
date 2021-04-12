@@ -8,7 +8,8 @@ static const char TAG[] = "example";
 static void print_pop_handler(__unused void *arg, __unused esp_event_base_t event_base,
                               __unused int32_t event_id, __unused void *event_data)
 {
-    ESP_LOGI(TAG, "Proof of possession: %s", app_wifi_get_pop());
+    ESP_LOGI(TAG, "Service name: %s", app_wifi_prov_get_service_name());
+    ESP_LOGI(TAG, "Proof of possession: %s", app_wifi_get_prov_pop());
 }
 
 void app_main()

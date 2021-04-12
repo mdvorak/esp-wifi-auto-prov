@@ -2,10 +2,10 @@
 #include "app_wifi_defs.h"
 #include <esp_log.h>
 #include <esp_wifi.h>
-#include <wifi_provisioning/manager.h>
 #include <wifi_reconnect.h>
 
 #if APP_WIFI_PROV_TYPE_BLE
+#include <string.h>
 #include <wifi_provisioning/scheme_ble.h>
 #elif APP_WIFI_PROV_TYPE_SOFT_AP
 #include <wifi_provisioning/scheme_softap.h>
@@ -14,10 +14,21 @@
 static const char TAG[] = "app_wifi";
 
 #define POP_LEN 9
+#define SERVICE_NAME_LEN 30
 
 static esp_timer_handle_t wifi_prov_timeout_timer = NULL;
 static wifi_config_t startup_wifi_config = {};
 static char *pop = NULL;
+static char *service_name = NULL;
+
+static void free_prov_params()
+{
+    free(pop);
+    pop = NULL;
+
+    free(service_name);
+    service_name = NULL;
+}
 
 static void wifi_prov_timeout_timer_delete()
 {
@@ -58,9 +69,8 @@ static void wifi_prov_event_handler(__unused void *arg, __unused esp_event_base_
         ESP_LOGI(TAG, "provisioning successful");
         break;
     case WIFI_PROV_DEINIT:
-        // Release PoP
-        free(pop);
-        pop = NULL;
+        // Release memory
+        free_prov_params();
         break;
     case WIFI_PROV_END: {
         ESP_LOGI(TAG, "provisioning end");
@@ -94,15 +104,31 @@ static void wifi_prov_event_handler(__unused void *arg, __unused esp_event_base_
 
 static esp_err_t device_pop_init()
 {
+    if (pop) return ESP_OK;
+
     uint8_t eth_mac[6];
     esp_err_t err = esp_wifi_get_mac(WIFI_IF_STA, eth_mac);
-    if (err == ESP_OK)
-    {
-        pop = calloc(POP_LEN, sizeof(char));
-        snprintf(pop, POP_LEN, "%02x%02x%02x%02x", eth_mac[2], eth_mac[3], eth_mac[4], eth_mac[5]);
-        return ESP_OK;
-    }
-    return err;
+    if (err != ESP_OK)
+        return err;
+
+    pop = calloc(POP_LEN, sizeof(char));
+    if (!pop)
+        return ESP_ERR_NO_MEM;
+
+    snprintf(pop, POP_LEN, "%02x%02x%02x%02x", eth_mac[2], eth_mac[3], eth_mac[4], eth_mac[5]);
+    return ESP_OK;
+}
+
+static esp_err_t service_name_init()
+{
+    if (service_name) return ESP_OK;
+
+    service_name = calloc(SERVICE_NAME_LEN, sizeof(char));
+    if (!service_name)
+        return ESP_ERR_NO_MEM;
+
+    snprintf(service_name, SERVICE_NAME_LEN, "PROV_%x", esp_random());
+    return ESP_OK;
 }
 
 esp_err_t app_wifi_init(const char *hostname)
@@ -164,11 +190,11 @@ esp_err_t app_wifi_start(wifi_prov_security_t security, bool force_provisioning)
             // Proof of possession
             // NOTE this uses atm MAC, which is stable, and QR code can be printed on the device
             ESP_ERROR_CHECK(device_pop_init());
+            ESP_LOGI(TAG, "pop: %s", pop);
         }
 
         // Service name
-        char service_name[14] = {};
-        snprintf(service_name, sizeof(service_name), "PROV_%x", esp_random());
+        ESP_ERROR_CHECK(service_name_init());
         ESP_LOGI(TAG, "service name: %s", service_name);
 
         // Start
@@ -194,7 +220,32 @@ esp_err_t app_wifi_start(wifi_prov_security_t security, bool force_provisioning)
     return ESP_OK;
 }
 
-const char *app_wifi_get_pop()
+const char *app_wifi_get_prov_pop()
 {
     return pop;
+}
+
+void app_wifi_set_prov_pop(const char *value)
+{
+    if (pop)
+    {
+        free(pop);
+    }
+
+    pop = value ? strdup(value) : NULL;
+}
+
+const char *app_wifi_prov_get_service_name()
+{
+    return service_name;
+}
+
+void app_wifi_prov_set_service_name(const char *name)
+{
+    if (service_name)
+    {
+        free(service_name);
+    }
+
+    service_name = name ? strdup(name) : NULL;
 }
