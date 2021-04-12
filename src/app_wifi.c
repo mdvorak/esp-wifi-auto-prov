@@ -16,6 +16,13 @@ static const char TAG[] = "app_wifi";
 #define POP_LEN 9
 #define SERVICE_NAME_LEN 30
 
+#define HANDLE_ERROR(expr, action)  \
+    {                               \
+        esp_err_t err_ = (expr);    \
+        if (err_ != ESP_OK) action; \
+    }                               \
+    (void)0
+
 static esp_timer_handle_t wifi_prov_timeout_timer = NULL;
 static wifi_config_t startup_wifi_config = {};
 static wifi_prov_security_t security;
@@ -80,14 +87,14 @@ static void wifi_prov_event_handler(__unused void *arg, __unused esp_event_base_
 
         // When successful, config should be correctly set
         // On timeout, it needs to be reset manually (probably bug in wifi config stack)
-        ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_FLASH));
+        ESP_ERROR_CHECK_WITHOUT_ABORT(esp_wifi_set_storage(WIFI_STORAGE_FLASH));
         wifi_config_t current_cfg = {};
-        ESP_ERROR_CHECK(esp_wifi_get_config(ESP_IF_WIFI_STA, &current_cfg));
+        ESP_ERROR_CHECK_WITHOUT_ABORT(esp_wifi_get_config(ESP_IF_WIFI_STA, &current_cfg));
 
         if (current_cfg.sta.ssid[0] == '\0')
         {
             ESP_LOGI(TAG, "wifi credentials not found after provisioning, trying startup wifi config");
-            ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &startup_wifi_config));
+            ESP_ERROR_CHECK_WITHOUT_ABORT(esp_wifi_set_config(ESP_IF_WIFI_STA, &startup_wifi_config));
         }
         else if (startup_wifi_config.sta.ssid[0] == '\0')
         {
@@ -139,19 +146,21 @@ esp_err_t app_wifi_init(const struct app_wifi_config *config)
         return ESP_ERR_INVALID_ARG;
     }
 
+    esp_err_t err = ESP_OK;
+
     // Initialize WiFi
-    ESP_ERROR_CHECK(esp_netif_init());
+    HANDLE_ERROR(err = esp_netif_init(), goto exit);
     esp_netif_create_default_wifi_sta();
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
-    ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_FLASH));
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+    HANDLE_ERROR(err = esp_wifi_init(&cfg), goto exit);
+    HANDLE_ERROR(err = esp_wifi_set_storage(WIFI_STORAGE_FLASH), goto exit);
+    HANDLE_ERROR(err = esp_wifi_set_mode(WIFI_MODE_STA), goto exit);
 
     // Hostname
     if (config->hostname != NULL)
     {
-        ESP_ERROR_CHECK(tcpip_adapter_set_hostname(TCPIP_ADAPTER_IF_STA, config->hostname));
+        HANDLE_ERROR(err = tcpip_adapter_set_hostname(TCPIP_ADAPTER_IF_STA, config->hostname), goto exit);
     }
 
     // Copy provision params
@@ -167,19 +176,23 @@ esp_err_t app_wifi_init(const struct app_wifi_config *config)
 
     // Store original STA config, so it can be used on provisioning timeout
     // Note: This is needed, since wifi stack is unable to re-read correct config from NVS after provisioning for some reason
-    ESP_ERROR_CHECK(esp_wifi_get_config(ESP_IF_WIFI_STA, &startup_wifi_config));
+    HANDLE_ERROR(err = esp_wifi_get_config(ESP_IF_WIFI_STA, &startup_wifi_config), goto exit);
 
     // Listen for events
-    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_PROV_EVENT, ESP_EVENT_ANY_ID, &wifi_prov_event_handler, NULL));
+    HANDLE_ERROR(err = esp_event_handler_register(WIFI_PROV_EVENT, ESP_EVENT_ANY_ID, &wifi_prov_event_handler, NULL), goto exit);
 
     // Start reconnection task (this does not initiate the connection)
-    ESP_ERROR_CHECK(wifi_reconnect_start()); // NOTE this must be called before connect, otherwise it might miss connected event
+    HANDLE_ERROR(err = wifi_reconnect_start(), goto exit); // NOTE this must be called before connect, otherwise it might miss connected event
 
-    return ESP_OK;
+exit:
+    // Done
+    return err;
 }
 
 esp_err_t app_wifi_start(bool force_provisioning)
 {
+    esp_err_t err = ESP_OK;
+
     // Initialize provisioning
     wifi_prov_mgr_config_t wifi_prof_cfg = {
 #if APP_WIFI_PROV_TYPE_BLE
@@ -190,11 +203,11 @@ esp_err_t app_wifi_start(bool force_provisioning)
         .scheme_event_handler = WIFI_PROV_EVENT_HANDLER_NONE,
 #endif
     };
-    ESP_ERROR_CHECK(wifi_prov_mgr_init(wifi_prof_cfg));
+    HANDLE_ERROR(err = wifi_prov_mgr_init(wifi_prof_cfg), goto exit);
 
     // Detect provisioning mode
     bool provisioned = false;
-    ESP_ERROR_CHECK(wifi_prov_mgr_is_provisioned(&provisioned));
+    HANDLE_ERROR(err = wifi_prov_mgr_is_provisioned(&provisioned), goto exit);
 
     if (!provisioned || force_provisioning)
     {
@@ -205,23 +218,23 @@ esp_err_t app_wifi_start(bool force_provisioning)
         {
             // Proof of possession
             // NOTE this uses atm MAC, which is stable, and QR code can be printed on the device
-            ESP_ERROR_CHECK(device_pop_init());
+            HANDLE_ERROR(err = device_pop_init(), goto exit);
             ESP_LOGI(TAG, "pop: %s", pop);
         }
 
         // Service name
-        ESP_ERROR_CHECK(service_name_init());
+        HANDLE_ERROR(err = service_name_init(), goto exit);
         ESP_LOGI(TAG, "service name: %s", service_name);
 
         // Start
-        ESP_ERROR_CHECK(wifi_prov_mgr_start_provisioning(security, pop, service_name, NULL));
+        HANDLE_ERROR(err = wifi_prov_mgr_start_provisioning(security, pop, service_name, NULL), goto exit);
 
         esp_timer_create_args_t args = {
             .callback = wifi_prov_timeout_handler,
             .name = "wifi_prov_timeout",
         };
-        ESP_ERROR_CHECK(esp_timer_create(&args, &wifi_prov_timeout_timer));
-        ESP_ERROR_CHECK(esp_timer_start_once(wifi_prov_timeout_timer, APP_WIFI_PROV_TIMEOUT_S * 1000000));
+        HANDLE_ERROR(err = esp_timer_create(&args, &wifi_prov_timeout_timer), goto exit);
+        HANDLE_ERROR(err = esp_timer_start_once(wifi_prov_timeout_timer, APP_WIFI_PROV_TIMEOUT_S * 1000000), goto exit);
     }
     else
     {
@@ -229,11 +242,13 @@ esp_err_t app_wifi_start(bool force_provisioning)
         wifi_prov_mgr_deinit();
 
         // Connect to existing wifi
-        ESP_ERROR_CHECK(esp_wifi_start());
+        HANDLE_ERROR(err = esp_wifi_start(), goto exit);
         wifi_reconnect_resume();
     }
 
-    return ESP_OK;
+exit:
+    // Done
+    return err;
 }
 
 const char *app_wifi_get_prov_pop()
