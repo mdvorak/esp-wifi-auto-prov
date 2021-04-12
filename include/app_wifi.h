@@ -8,12 +8,15 @@
 extern "C" {
 #endif
 
+typedef esp_err_t (*app_wifi_connect_fn)();
+
 struct app_wifi_config
 {
     wifi_prov_security_t security;
     const char *service_name;
     const char *pop;
     const char *hostname;
+    app_wifi_connect_fn wifi_connect;
 };
 
 esp_err_t app_wifi_init(const struct app_wifi_config *config);

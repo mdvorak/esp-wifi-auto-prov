@@ -2,7 +2,6 @@
 #include "app_wifi_defs.h"
 #include <esp_log.h>
 #include <esp_wifi.h>
-#include <wifi_reconnect.h>
 
 #if APP_WIFI_PROV_TYPE_BLE
 #include <string.h>
@@ -16,16 +15,17 @@ static const char TAG[] = "app_wifi";
 #define POP_LEN 9
 #define SERVICE_NAME_LEN 30
 
-#define HANDLE_ERROR(expr, action)  \
-    {                               \
-        esp_err_t err_ = (expr);    \
-        if (err_ != ESP_OK) action; \
-    }                               \
+#define HANDLE_ERROR(expr, action)      \
+    {                                   \
+        esp_err_t err_ = (expr);        \
+        if (err_ != ESP_OK) { action; } \
+    }                                   \
     (void)0
 
 static esp_timer_handle_t wifi_prov_timeout_timer = NULL;
 static wifi_config_t startup_wifi_config = {};
-static wifi_prov_security_t security;
+static wifi_prov_security_t security = WIFI_PROV_SECURITY_1;
+static app_wifi_connect_fn wifi_connect = NULL;
 static char *pop = NULL;
 static char *service_name = NULL;
 
@@ -102,7 +102,8 @@ static void wifi_prov_event_handler(__unused void *arg, __unused esp_event_base_
             ESP_LOGI(TAG, "no wifi credentials found");
         }
 
-        wifi_reconnect_resume();
+        // Connect
+        ESP_ERROR_CHECK_WITHOUT_ABORT(wifi_connect());
         break;
     }
     default:
@@ -141,7 +142,7 @@ static esp_err_t service_name_init()
 
 esp_err_t app_wifi_init(const struct app_wifi_config *config)
 {
-    if (!config)
+    if (config == NULL)
     {
         return ESP_ERR_INVALID_ARG;
     }
@@ -165,6 +166,7 @@ esp_err_t app_wifi_init(const struct app_wifi_config *config)
 
     // Copy provision params
     security = config->security;
+    wifi_connect = config->wifi_connect ? config->wifi_connect : esp_wifi_connect; // If not set, use esp_wifi_connect()
     if (config->service_name)
     {
         service_name = strdup(config->service_name);
@@ -180,9 +182,6 @@ esp_err_t app_wifi_init(const struct app_wifi_config *config)
 
     // Listen for events
     HANDLE_ERROR(err = esp_event_handler_register(WIFI_PROV_EVENT, ESP_EVENT_ANY_ID, &wifi_prov_event_handler, NULL), goto exit);
-
-    // Start reconnection task (this does not initiate the connection)
-    HANDLE_ERROR(err = wifi_reconnect_start(), goto exit); // NOTE this must be called before connect, otherwise it might miss connected event
 
 exit:
     // Done
@@ -243,7 +242,7 @@ esp_err_t app_wifi_start(bool force_provisioning)
 
         // Connect to existing wifi
         HANDLE_ERROR(err = esp_wifi_start(), goto exit);
-        wifi_reconnect_resume();
+        HANDLE_ERROR(wifi_connect(), goto exit);
     }
 
 exit:
