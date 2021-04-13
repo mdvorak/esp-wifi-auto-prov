@@ -103,6 +103,7 @@ static void wifi_prov_event_handler(__unused void *arg, __unused esp_event_base_
         }
 
         // Connect
+        ESP_ERROR_CHECK_WITHOUT_ABORT(esp_wifi_set_mode(WIFI_MODE_STA));
         ESP_ERROR_CHECK_WITHOUT_ABORT(wifi_connect());
         break;
     }
@@ -156,7 +157,6 @@ esp_err_t app_wifi_init(const struct app_wifi_config *config)
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     HANDLE_ERROR(err = esp_wifi_init(&cfg), goto exit);
     HANDLE_ERROR(err = esp_wifi_set_storage(WIFI_STORAGE_FLASH), goto exit);
-    HANDLE_ERROR(err = esp_wifi_set_mode(WIFI_MODE_STA), goto exit);
 
     // Hostname
     if (config->hostname != NULL)
@@ -241,6 +241,7 @@ esp_err_t app_wifi_start(bool force_provisioning)
         wifi_prov_mgr_deinit();
 
         // Connect to existing wifi
+        HANDLE_ERROR(err = esp_wifi_set_mode(WIFI_MODE_STA), goto exit);
         HANDLE_ERROR(err = esp_wifi_start(), goto exit);
         HANDLE_ERROR(wifi_connect(), goto exit);
     }
