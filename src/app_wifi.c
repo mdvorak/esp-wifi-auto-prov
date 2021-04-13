@@ -241,6 +241,9 @@ esp_err_t app_wifi_start(bool force_provisioning)
     }
     else
     {
+        // Normal operation
+        ESP_LOGI(TAG, "already provisioned, connecting to known network");
+
         // Deallocate wifi provisioning
         wifi_prov_mgr_deinit();
 
