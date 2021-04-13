@@ -213,6 +213,10 @@ esp_err_t app_wifi_start(bool force_provisioning)
         // Provisioning mode
         ESP_LOGI(TAG, "provisioning starting, timeout %d s%s", APP_WIFI_PROV_TIMEOUT_S, force_provisioning ? " (forced)" : "");
 
+#if APP_WIFI_PROV_TYPE_SOFT_AP
+        esp_netif_create_default_wifi_ap();
+#endif
+
         if (security != WIFI_PROV_SECURITY_0)
         {
             // Proof of possession
