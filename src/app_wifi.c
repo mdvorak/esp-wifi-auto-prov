@@ -2,9 +2,9 @@
 #include "app_wifi_defs.h"
 #include <esp_log.h>
 #include <esp_wifi.h>
+#include <string.h>
 
 #if APP_WIFI_PROV_TYPE_BLE
-#include <string.h>
 #include <wifi_provisioning/scheme_ble.h>
 #elif APP_WIFI_PROV_TYPE_SOFT_AP
 #include <wifi_provisioning/scheme_softap.h>
