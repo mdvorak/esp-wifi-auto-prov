@@ -1,6 +1,8 @@
 #include "app_wifi.h"
 #include "app_wifi_defs.h"
+#include <esp_app_format.h>
 #include <esp_log.h>
+#include <esp_ota_ops.h>
 #include <esp_wifi.h>
 #include <string.h>
 
@@ -13,7 +15,7 @@
 static const char TAG[] = "app_wifi";
 
 #define POP_LEN 9
-#define SERVICE_NAME_LEN 30
+#define SERVICE_NAME_LEN (32 + 5)
 
 #define HANDLE_ERROR(expr, action)      \
     {                                   \
@@ -133,11 +135,23 @@ static esp_err_t service_name_init()
 {
     if (service_name) return ESP_OK;
 
+    // Allocate
     service_name = calloc(SERVICE_NAME_LEN, sizeof(char));
     if (!service_name)
         return ESP_ERR_NO_MEM;
 
-    snprintf(service_name, SERVICE_NAME_LEN, "PROV_%x", esp_random());
+    // Read from partition
+    esp_app_desc_t app_info = {};
+    esp_ota_get_partition_description(esp_ota_get_running_partition(), &app_info);
+
+    // Fallback to random string
+    if (strlen(app_info.project_name) == 0)
+    {
+        snprintf(app_info.project_name, sizeof(app_info.project_name), "%x", esp_random());
+    }
+
+    // Final name
+    snprintf(service_name, SERVICE_NAME_LEN, "PROV_%s", app_info.project_name);
     return ESP_OK;
 }
 
