@@ -15,4 +15,9 @@ menu "Application WiFi"
         help
             Timeout, after which is Wi-Fi provisioning stopped and device
             continues in normal mode of operation (connected or not).
+
+    config APP_WIFI_PROV_TRANSPORT
+        string
+        default "ble" if APP_WIFI_PROV_TYPE_BLE
+        default "softap" if APP_WIFI_PROV_TYPE_SOFT_AP
 endmenu
