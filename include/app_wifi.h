@@ -1,5 +1,6 @@
 #pragma once
 
+#include "app_wifi_defs.h"
 #include <esp_err.h>
 #include <stdbool.h>
 #include <wifi_provisioning/manager.h>
