@@ -1,4 +1,4 @@
-# WiFi provisioning
+# WiFi provisioning mode
 CONFIG_APP_WIFI_PROV_TYPE_BLE=y
 CONFIG_APP_WIFI_PROV_TYPE_SOFT_AP=n
 

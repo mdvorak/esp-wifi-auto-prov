@@ -13,5 +13,8 @@
 #endif
 
 #ifndef APP_WIFI_PROV_TRANSPORT
+/**
+ * @brief Transport type string. Either "ble" or "softap".
+ */
 #define APP_WIFI_PROV_TRANSPORT CONFIG_APP_WIFI_PROV_TRANSPORT
 #endif
