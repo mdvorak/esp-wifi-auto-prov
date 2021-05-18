@@ -15,7 +15,7 @@
 static const char TAG[] = "app_wifi";
 
 #define POP_LEN (9)
-#define SERVICE_NAME_LEN (32)
+#define SERVICE_NAME_LEN (28)
 #define SERVICE_NAME_MAX_LEN (32 + 5)
 
 #define HANDLE_ERROR(expr, action)      \
