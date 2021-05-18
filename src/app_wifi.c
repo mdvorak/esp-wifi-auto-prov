@@ -14,8 +14,9 @@
 
 static const char TAG[] = "app_wifi";
 
-#define POP_LEN 9
-#define SERVICE_NAME_LEN (32 + 5)
+#define POP_LEN (9)
+#define SERVICE_NAME_LEN (32)
+#define SERVICE_NAME_MAX_LEN (32 + 5)
 
 #define HANDLE_ERROR(expr, action)      \
     {                                   \
@@ -136,7 +137,7 @@ static esp_err_t service_name_init()
     if (service_name) return ESP_OK;
 
     // Allocate
-    service_name = calloc(SERVICE_NAME_LEN, sizeof(char));
+    service_name = calloc(SERVICE_NAME_MAX_LEN, sizeof(char));
     if (!service_name)
         return ESP_ERR_NO_MEM;
 
@@ -151,7 +152,9 @@ static esp_err_t service_name_init()
     }
 
     // Final name
-    snprintf(service_name, SERVICE_NAME_LEN, "PROV_%s", app_info.project_name);
+    snprintf(service_name, SERVICE_NAME_MAX_LEN, "PROV_%s", app_info.project_name);
+    // Truncate
+    service_name[SERVICE_NAME_LEN] = '\0';
     return ESP_OK;
 }
 
