@@ -31,6 +31,8 @@ CONFIG_APP_WIFI_PROV_TYPE_BLE=y
 CONFIG_APP_WIFI_PROV_TYPE_SOFT_AP=n
 # WiFI Provisioning timeout
 CONFIG_APP_WIFI_PROV_TIMEOUT_S=120
+# QR code URL
+CONFIG_APP_WIFI_QRCODE_URL="https://espressif.github.io/esp-jumpstart/qrcode.html"
 ```
 
 These values are aslo provided as defines, see [app_wifi_defs.h](./include/app_wifi_defs.h).
