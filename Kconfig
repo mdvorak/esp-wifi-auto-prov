@@ -20,4 +20,10 @@ menu "Application WiFi"
         string
         default "ble" if APP_WIFI_PROV_TYPE_BLE
         default "softap" if APP_WIFI_PROV_TYPE_SOFT_AP
+
+    config APP_WIFI_QRCODE_URL
+        string "QR Code URL"
+        default "https://espressif.github.io/esp-jumpstart/qrcode.html"
+        help
+            QR code data are passed as JSON in data URL parameter.
 endmenu
