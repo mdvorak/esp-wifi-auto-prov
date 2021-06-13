@@ -99,6 +99,24 @@ const char *app_wifi_get_prov_pop();
  */
 const char *app_wifi_prov_get_service_name();
 
+/**
+ * @brief Prints URL to stdout, pointing to QR code for provisioning.
+ *
+ * By default, QR code is static for given device, therefore can be printed
+ * on the device. It is used by Espressif mobile apps.
+ *
+ * Should be used in a handler for the WIFI_PROV_START event.
+ */
+void app_wifi_print_qrcode_link();
+
+/**
+ * @brief Registers a handler for app_wifi_print_qrcode_link.
+ *
+ * @param context Identifying an instance of a registered event handler, can be NULL.
+ * @return Result of the esp_event_handler_instance_register call.
+ */
+esp_err_t app_wifi_print_qr_code_handler_register(esp_event_handler_instance_t *context);
+
 #ifdef __cplusplus
 }
 #endif
