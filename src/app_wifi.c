@@ -141,18 +141,14 @@ static esp_err_t service_name_init()
     if (!service_name)
         return ESP_ERR_NO_MEM;
 
-    // Read from partition
-    esp_app_desc_t app_info = {};
-    esp_ota_get_partition_description(esp_ota_get_running_partition(), &app_info);
-
-    // Fallback to random string
-    if (strlen(app_info.project_name) == 0)
-    {
-        snprintf(app_info.project_name, sizeof(app_info.project_name), "%x", esp_random());
-    }
+    // Read MAC
+    uint8_t eth_mac[6];
+    esp_err_t err = esp_wifi_get_mac(WIFI_IF_STA, eth_mac);
+    if (err != ESP_OK)
+        return err;
 
     // Final name
-    snprintf(service_name, SERVICE_NAME_MAX_LEN, "PROV_%s", app_info.project_name);
+    snprintf(service_name, SERVICE_NAME_MAX_LEN, "PROV_%02x%02x", eth_mac[0], eth_mac[1]);
     // Truncate
     service_name[SERVICE_NAME_LEN] = '\0';
     return ESP_OK;
