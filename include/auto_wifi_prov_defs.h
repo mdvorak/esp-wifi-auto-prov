@@ -1,5 +1,7 @@
 #pragma once
 
+#include "sdkconfig.h"
+
 #ifndef AUTO_WIFI_PROV_TYPE_BLE
 #define AUTO_WIFI_PROV_TYPE_BLE CONFIG_AUTO_WIFI_PROV_TYPE_BLE
 #endif
