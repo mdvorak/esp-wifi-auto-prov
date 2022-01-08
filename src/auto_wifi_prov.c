@@ -288,10 +288,19 @@ void auto_wifi_prov_print_qrcode_link()
 {
     const char VER[] = "v1";
     char payload[200] = {};
-    const char *pop_str = auto_wifi_prov_get_prov_pop();
-    // {"ver":"%s","name":"%s","pop":"%s","transport":"%s"}
-    snprintf(payload, sizeof(payload), "%%7B%%22ver%%22%%3A%%22%s%%22%%2C%%22name%%22%%3A%%22%s%%22%%2C%%22pop%%22%%3A%%22%s%%22%%2C%%22transport%%22%%3A%%22%s%%22%%7D",
-             VER, auto_wifi_prov_get_service_name(), pop_str, AUTO_WIFI_PROV_TRANSPORT);
+    if (security != WIFI_PROV_SECURITY_0)
+    {
+        const char *pop_str = pop != NULL ? pop : "";
+        // {"ver":"%s","name":"%s","pop":"%s","transport":"%s"}
+        snprintf(payload, sizeof(payload), "%%7B%%22ver%%22%%3A%%22%s%%22%%2C%%22name%%22%%3A%%22%s%%22%%2C%%22pop%%22%%3A%%22%s%%22%%2C%%22transport%%22%%3A%%22%s%%22%%7D",
+                 VER, service_name, pop_str, AUTO_WIFI_PROV_TRANSPORT);
+    }
+    else
+    {
+        // {"ver":"%s","name":"%s","transport":"%s"}
+        snprintf(payload, sizeof(payload), "%%7B%%22ver%%22%%3A%%22%s%%22%%2C%%22name%%22%%3A%%22%s%%22%%2C%%22transport%%22%%3A%%22%s%%22%%7D",
+                 VER, service_name, AUTO_WIFI_PROV_TRANSPORT);
+    }
     // NOTE print this regardless of log level settings
     printf("PROVISIONING: To view QR Code, copy paste the URL in a browser:\n%s?data=%s\n", AUTO_WIFI_PROV_QRCODE_URL, payload);
 }
