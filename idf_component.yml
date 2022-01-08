@@ -3,4 +3,4 @@ description: WiFi setup and provisioning.
 url: https://github.com/mdvorak/esp-auto-wifi-prov.git
 dependencies:
   idf:
-    version: ">=4.1"
+    version: ">=4.2"
