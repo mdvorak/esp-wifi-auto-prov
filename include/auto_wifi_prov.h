@@ -45,7 +45,7 @@ struct auto_wifi_prov_config
      * When unset, no hostname is set.
      * Simply wrapper for tcpip_adapter_set_hostname(TCPIP_ADAPTER_IF_STA, hostname).
      */
-    const char *hostname;
+    __attribute__((deprecated("this is gonna be removed in future versions, use tcpip_adapter_set_hostname instead"))) const char *hostname;
     /**
      * @brief Function to be used to initiate WiFi connection.
      *

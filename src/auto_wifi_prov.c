@@ -172,10 +172,13 @@ esp_err_t auto_wifi_prov_init(const struct auto_wifi_prov_config *config)
     HANDLE_ERROR(err = esp_wifi_set_storage(WIFI_STORAGE_FLASH), goto exit);
 
     // Hostname
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     if (config->hostname != NULL)
     {
         HANDLE_ERROR(err = tcpip_adapter_set_hostname(TCPIP_ADAPTER_IF_STA, config->hostname), goto exit);
     }
+#pragma GCC diagnostic pop
 
     // Copy provision params
     security = config->security;
@@ -285,15 +288,16 @@ void auto_wifi_prov_print_qrcode_link()
 {
     const char VER[] = "v1";
     char payload[200] = {};
+    const char *pop_str = auto_wifi_prov_get_prov_pop();
     // {"ver":"%s","name":"%s","pop":"%s","transport":"%s"}
     snprintf(payload, sizeof(payload), "%%7B%%22ver%%22%%3A%%22%s%%22%%2C%%22name%%22%%3A%%22%s%%22%%2C%%22pop%%22%%3A%%22%s%%22%%2C%%22transport%%22%%3A%%22%s%%22%%7D",
-             VER, auto_wifi_prov_get_service_name(), auto_wifi_prov_get_prov_pop(), AUTO_WIFI_PROV_TRANSPORT);
+             VER, auto_wifi_prov_get_service_name(), pop_str, AUTO_WIFI_PROV_TRANSPORT);
     // NOTE print this regardless of log level settings
     printf("PROVISIONING: To view QR Code, copy paste the URL in a browser:\n%s?data=%s\n", AUTO_WIFI_PROV_QRCODE_URL, payload);
 }
 
 static void auto_wifi_prov_print_qrcode_link_handler(__unused void *arg, __unused esp_event_base_t event_base,
-                                               __unused int32_t event_id, __unused void *event_data)
+                                                     __unused int32_t event_id, __unused void *event_data)
 {
     auto_wifi_prov_print_qrcode_link();
 }
