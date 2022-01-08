@@ -19,8 +19,10 @@ jobs:
         mode:
           - CONFIG_AUTO_WIFI_PROV_TYPE_BLE: y
             CONFIG_AUTO_WIFI_PROV_TYPE_SOFT_AP: n
+            CONFIG_BT_ENABLED: y
           - CONFIG_AUTO_WIFI_PROV_TYPE_BLE: n
             CONFIG_AUTO_WIFI_PROV_TYPE_SOFT_AP: y
+            CONFIG_BT_ENABLED: n
         # ESP-IDF versions and targets
         idf_ver: [ v4.1, v4.2, v4.3, v4.4 ]
         idf_target: [ esp32, esp32s2, esp32s3, esp32c3, esp32h2 ]
@@ -48,6 +50,7 @@ jobs:
         run: |
           echo "CONFIG_AUTO_WIFI_PROV_TYPE_BLE=${{ matrix.mode.CONFIG_AUTO_WIFI_PROV_TYPE_BLE }}" >> sdkconfig
           echo "CONFIG_AUTO_WIFI_PROV_TYPE_SOFT_AP=${{ matrix.mode.CONFIG_AUTO_WIFI_PROV_TYPE_SOFT_AP }}" >> sdkconfig
+          echo "CONFIG_BT_ENABLED=${{ matrix.mode.CONFIG_BT_ENABLED }}" >> sdkconfig
           
           . ${IDF_PATH}/export.sh
           idf.py build
