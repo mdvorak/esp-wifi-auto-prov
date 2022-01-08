@@ -1,6 +1,6 @@
-# esp-wifi-prov
+# auto_wifi_prov
 
-![build](https://github.com/mdvorak/esp-wifi-prov/workflows/build/badge.svg)
+![build](https://github.com/mdvorak/esp-auto-wifi-prov/workflows/build/badge.svg)
 
 Wi-Fi setup and provisioning,
 using [Unified Provisioning](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/provisioning/provisioning.html)
@@ -16,10 +16,10 @@ Phone apps:
 To reference this library by your project, add it as git submodule, using command
 
 ```shell
-git submodule add https://github.com/mdvorak/esp-wifi-prov.git components/app_wifi
+git submodule add https://github.com/mdvorak/esp-auto-wifi-prov.git components/auto_wifi_prov
 ```
 
-For code usage see the [example](./example/main/wifi_prov_example_main.c).
+For code usage see the [example](./example/main/auto_wifi_prov_example_main.c).
 
 ### Configuration
 
@@ -27,15 +27,15 @@ Provisioning mode can be selected via menuconfig. Following config values are su
 
 ```
 # WiFi provisioning mode
-CONFIG_APP_WIFI_PROV_TYPE_BLE=y
-CONFIG_APP_WIFI_PROV_TYPE_SOFT_AP=n
+CONFIG_AUTO_WIFI_PROV_TYPE_BLE=y
+CONFIG_AUTO_WIFI_PROV_TYPE_SOFT_AP=n
 # WiFI Provisioning timeout
-CONFIG_APP_WIFI_PROV_TIMEOUT_S=120
+CONFIG_AUTO_WIFI_PROV_TIMEOUT_S=120
 # QR code URL
-CONFIG_APP_WIFI_QRCODE_URL="https://espressif.github.io/esp-jumpstart/qrcode.html"
+CONFIG_AUTO_WIFI_PROV_QRCODE_URL="https://espressif.github.io/esp-jumpstart/qrcode.html"
 ```
 
-These values are aslo provided as defines, see [app_wifi_defs.h](./include/wifi_prov_defs.h).
+These values are aslo provided as defines, see [app_wifi_defs.h](./include/auto_wifi_prov_defs.h).
 
 ### BLE provisioning
 

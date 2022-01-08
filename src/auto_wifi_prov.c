@@ -1,18 +1,18 @@
-#include "wifi_prov.h"
-#include "wifi_prov_defs.h"
+#include "auto_wifi_prov.h"
+#include "auto_wifi_prov_defs.h"
 #include <esp_app_format.h>
 #include <esp_log.h>
 #include <esp_ota_ops.h>
 #include <esp_wifi.h>
 #include <string.h>
 
-#if APP_WIFI_PROV_TYPE_BLE
+#if AUTO_WIFI_PROV_TYPE_BLE
 #include <wifi_provisioning/scheme_ble.h>
-#elif APP_WIFI_PROV_TYPE_SOFT_AP
+#elif AUTO_WIFI_PROV_TYPE_SOFT_AP
 #include <wifi_provisioning/scheme_softap.h>
 #endif
 
-static const char TAG[] = "app_wifi";
+static const char TAG[] = "auto_wifi_prov";
 
 #define POP_LEN (9)
 #define SERVICE_NAME_LEN (28)
@@ -28,7 +28,7 @@ static const char TAG[] = "app_wifi";
 static esp_timer_handle_t wifi_prov_timeout_timer = NULL;
 static wifi_config_t startup_wifi_config = {};
 static wifi_prov_security_t security = WIFI_PROV_SECURITY_1;
-static app_wifi_connect_fn wifi_connect = NULL;
+static auto_wifi_prov_connect_fn wifi_connect = NULL;
 static char *pop = NULL;
 static char *service_name = NULL;
 
@@ -92,12 +92,12 @@ static void wifi_prov_event_handler(__unused void *arg, __unused esp_event_base_
         // On timeout, it needs to be reset manually (probably bug in wifi config stack)
         ESP_ERROR_CHECK_WITHOUT_ABORT(esp_wifi_set_storage(WIFI_STORAGE_FLASH));
         wifi_config_t current_cfg = {};
-        ESP_ERROR_CHECK_WITHOUT_ABORT(esp_wifi_get_config(ESP_IF_WIFI_STA, &current_cfg));
+        ESP_ERROR_CHECK_WITHOUT_ABORT(esp_wifi_get_config(WIFI_IF_STA, &current_cfg));
 
         if (current_cfg.sta.ssid[0] == '\0')
         {
             ESP_LOGI(TAG, "wifi credentials not found after provisioning, trying startup wifi config");
-            ESP_ERROR_CHECK_WITHOUT_ABORT(esp_wifi_set_config(ESP_IF_WIFI_STA, &startup_wifi_config));
+            ESP_ERROR_CHECK_WITHOUT_ABORT(esp_wifi_set_config(WIFI_IF_STA, &startup_wifi_config));
         }
         else if (startup_wifi_config.sta.ssid[0] == '\0')
         {
@@ -154,7 +154,7 @@ static esp_err_t service_name_init()
     return ESP_OK;
 }
 
-esp_err_t app_wifi_init(const struct app_wifi_config *config)
+esp_err_t auto_wifi_prov_init(const struct auto_wifi_prov_config *config)
 {
     if (config == NULL)
     {
@@ -191,7 +191,7 @@ esp_err_t app_wifi_init(const struct app_wifi_config *config)
 
     // Store original STA config, so it can be used on provisioning timeout
     // Note: This is needed, since wifi stack is unable to re-read correct config from NVS after provisioning for some reason
-    HANDLE_ERROR(err = esp_wifi_get_config(ESP_IF_WIFI_STA, &startup_wifi_config), goto exit);
+    HANDLE_ERROR(err = esp_wifi_get_config(WIFI_IF_STA, &startup_wifi_config), goto exit);
 
     // Listen for events
     HANDLE_ERROR(err = esp_event_handler_register(WIFI_PROV_EVENT, ESP_EVENT_ANY_ID, &wifi_prov_event_handler, NULL), goto exit);
@@ -201,16 +201,16 @@ exit:
     return err;
 }
 
-esp_err_t app_wifi_start(bool force_provisioning)
+esp_err_t auto_wifi_prov_start(bool force_provisioning)
 {
     esp_err_t err = ESP_OK;
 
     // Initialize provisioning
     wifi_prov_mgr_config_t wifi_prof_cfg = {
-#if APP_WIFI_PROV_TYPE_BLE
+#if AUTO_WIFI_PROV_TYPE_BLE
         .scheme = wifi_prov_scheme_ble,
         .scheme_event_handler = WIFI_PROV_SCHEME_BLE_EVENT_HANDLER_FREE_BTDM,
-#elif APP_WIFI_PROV_TYPE_SOFT_AP
+#elif AUTO_WIFI_PROV_TYPE_SOFT_AP
         .scheme = wifi_prov_scheme_softap,
         .scheme_event_handler = WIFI_PROV_EVENT_HANDLER_NONE,
 #endif
@@ -224,9 +224,9 @@ esp_err_t app_wifi_start(bool force_provisioning)
     if (!provisioned || force_provisioning)
     {
         // Provisioning mode
-        ESP_LOGI(TAG, "provisioning starting, timeout %d s%s", APP_WIFI_PROV_TIMEOUT_S, force_provisioning ? " (forced)" : "");
+        ESP_LOGI(TAG, "provisioning starting, timeout %d s%s", AUTO_WIFI_PROV_TIMEOUT_S, force_provisioning ? " (forced)" : "");
 
-#if APP_WIFI_PROV_TYPE_SOFT_AP
+#if AUTO_WIFI_PROV_TYPE_SOFT_AP
         esp_netif_create_default_wifi_ap();
 #endif
 
@@ -250,7 +250,7 @@ esp_err_t app_wifi_start(bool force_provisioning)
             .name = "wifi_prov_timeout",
         };
         HANDLE_ERROR(err = esp_timer_create(&args, &wifi_prov_timeout_timer), goto exit);
-        HANDLE_ERROR(err = esp_timer_start_once(wifi_prov_timeout_timer, APP_WIFI_PROV_TIMEOUT_S * 1000000), goto exit);
+        HANDLE_ERROR(err = esp_timer_start_once(wifi_prov_timeout_timer, AUTO_WIFI_PROV_TIMEOUT_S * 1000000), goto exit);
     }
     else
     {
@@ -271,34 +271,34 @@ exit:
     return err;
 }
 
-const char *app_wifi_get_prov_pop()
+const char *auto_wifi_prov_get_prov_pop()
 {
     return pop;
 }
 
-const char *app_wifi_prov_get_service_name()
+const char *auto_wifi_prov_get_service_name()
 {
     return service_name;
 }
 
-void app_wifi_print_qrcode_link()
+void auto_wifi_prov_print_qrcode_link()
 {
     const char VER[] = "v1";
     char payload[200] = {};
     // {"ver":"%s","name":"%s","pop":"%s","transport":"%s"}
     snprintf(payload, sizeof(payload), "%%7B%%22ver%%22%%3A%%22%s%%22%%2C%%22name%%22%%3A%%22%s%%22%%2C%%22pop%%22%%3A%%22%s%%22%%2C%%22transport%%22%%3A%%22%s%%22%%7D",
-             VER, app_wifi_prov_get_service_name(), app_wifi_get_prov_pop(), APP_WIFI_PROV_TRANSPORT);
+             VER, auto_wifi_prov_get_service_name(), auto_wifi_prov_get_prov_pop(), AUTO_WIFI_PROV_TRANSPORT);
     // NOTE print this regardless of log level settings
-    printf("PROVISIONING: To view QR Code, copy paste the URL in a browser:\n%s?data=%s\n", APP_WIFI_QRCODE_URL, payload);
+    printf("PROVISIONING: To view QR Code, copy paste the URL in a browser:\n%s?data=%s\n", AUTO_WIFI_PROV_QRCODE_URL, payload);
 }
 
-static void app_wifi_print_qrcode_link_handler(__unused void *arg, __unused esp_event_base_t event_base,
+static void auto_wifi_prov_print_qrcode_link_handler(__unused void *arg, __unused esp_event_base_t event_base,
                                                __unused int32_t event_id, __unused void *event_data)
 {
-    app_wifi_print_qrcode_link();
+    auto_wifi_prov_print_qrcode_link();
 }
 
-esp_err_t app_wifi_print_qr_code_handler_register(esp_event_handler_instance_t *context)
+esp_err_t auto_wifi_prov_print_qr_code_handler_register(esp_event_handler_instance_t *context)
 {
-    return esp_event_handler_instance_register(WIFI_PROV_EVENT, WIFI_PROV_START, app_wifi_print_qrcode_link_handler, NULL, context);
+    return esp_event_handler_instance_register(WIFI_PROV_EVENT, WIFI_PROV_START, auto_wifi_prov_print_qrcode_link_handler, NULL, context);
 }

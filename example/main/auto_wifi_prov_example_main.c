@@ -1,4 +1,4 @@
-#include <wifi_prov.h>
+#include <app_wifi.h>
 #include <esp_log.h>
 #include <nvs_flash.h>
 
