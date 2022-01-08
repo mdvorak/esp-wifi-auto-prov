@@ -1,6 +1,6 @@
 #pragma once
 
-#include "auto_wifi_prov_defs.h"
+#include "wifi_auto_prov_defs.h"
 #include <esp_err.h>
 #include <stdbool.h>
 #include <wifi_provisioning/manager.h>
@@ -10,16 +10,16 @@ extern "C" {
 #endif
 
 /**
- * @brief Callback for auto_wifi_prov_config.wifi_connect.
+ * @brief Callback for wifi_auto_prov_config.wifi_connect.
  *
  * Signature corresponds to the esp_wifi_connect() function.
  */
-typedef esp_err_t (*auto_wifi_prov_connect_fn)();
+typedef esp_err_t (*wifi_auto_prov_connect_fn)();
 
 /**
  * @brief Configuration for WiFi init and provisioning.
  */
-struct auto_wifi_prov_config
+struct wifi_auto_prov_config
 {
     /**
      * @brief Required security mode.
@@ -51,18 +51,18 @@ struct auto_wifi_prov_config
      *
      * Default is esp_wifi_connect().
      */
-    auto_wifi_prov_connect_fn wifi_connect;
+    wifi_auto_prov_connect_fn wifi_connect;
 };
 
 /**
  * @brief Initialize WiFi. WiFi is not started yet by this command.
  *
- * To start the WiFi, call auto_wifi_prov_start().
+ * To start the WiFi, call wifi_auto_prov_start().
  *
  * @param config WiFi init config.
  * @return ESP_OK on success, error otherwise.
  */
-esp_err_t auto_wifi_prov_init(const struct auto_wifi_prov_config *config);
+esp_err_t wifi_auto_prov_init(const struct wifi_auto_prov_config *config);
 
 /**
  * @brief Start WiFi. Either tries to connect to configured WiFi, or starts provisioning.
@@ -75,7 +75,7 @@ esp_err_t auto_wifi_prov_init(const struct auto_wifi_prov_config *config);
  * @param force_provisioning When true, provisioning is started regardless of WiFi config.
  * @return ESP_OK on success, error otherwise.
  */
-esp_err_t auto_wifi_prov_start(bool force_provisioning);
+esp_err_t wifi_auto_prov_start(bool force_provisioning);
 
 /**
  * @brief Returns used proof of possession for a provisioning.
@@ -87,7 +87,7 @@ esp_err_t auto_wifi_prov_start(bool force_provisioning);
  *
  * @return Proof of possession string, if available. NULL otherwise.
  */
-const char *auto_wifi_prov_get_prov_pop();
+const char *wifi_auto_prov_get_prov_pop();
 
 /**
  * @brief Returns used service name for a provisioning.
@@ -97,7 +97,7 @@ const char *auto_wifi_prov_get_prov_pop();
  *
  * @return Service name string, if available. NULL otherwise.
  */
-const char *auto_wifi_prov_get_service_name();
+const char *wifi_auto_prov_get_service_name();
 
 /**
  * @brief Prints URL to stdout, pointing to QR code for provisioning.
@@ -107,15 +107,15 @@ const char *auto_wifi_prov_get_service_name();
  *
  * Should be used in a handler for the WIFI_PROV_START event.
  */
-void auto_wifi_prov_print_qrcode_link();
+void wifi_auto_prov_print_qrcode_link();
 
 /**
- * @brief Registers a handler for auto_wifi_prov_print_qrcode_link.
+ * @brief Registers a handler for wifi_auto_prov_print_qrcode_link.
  *
  * @param context Identifying an instance of a registered event handler, can be NULL.
  * @return Result of the esp_event_handler_instance_register call.
  */
-esp_err_t auto_wifi_prov_print_qr_code_handler_register(esp_event_handler_instance_t *context);
+esp_err_t wifi_auto_prov_print_qr_code_handler_register(esp_event_handler_instance_t *context);
 
 #ifdef __cplusplus
 }

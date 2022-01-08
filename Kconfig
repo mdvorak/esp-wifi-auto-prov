@@ -1,27 +1,27 @@
 menu "Auto WiFi Provisioning"
-    choice AUTO_WIFI_PROV_MODE
+    choice WIFI_AUTO_PROV_MODE
         prompt "WiFi provisioning mode"
-        default AUTO_WIFI_PROV_TYPE_BLE
+        default WIFI_AUTO_PROV_TYPE_BLE
 
-        config AUTO_WIFI_PROV_TYPE_BLE
+        config WIFI_AUTO_PROV_TYPE_BLE
             bool "Bluetooth"
-        config AUTO_WIFI_PROV_TYPE_SOFT_AP
+        config WIFI_AUTO_PROV_TYPE_SOFT_AP
             bool "WiFi SoftAP"
     endchoice
 
-    config AUTO_WIFI_PROV_TIMEOUT_S
+    config WIFI_AUTO_PROV_TIMEOUT_S
         int "Wi-Fi provisioning timeout"
         default 120
         help
             Timeout, after which is Wi-Fi provisioning stopped and device
             continues in normal mode of operation (connected or not).
 
-    config AUTO_WIFI_PROV_TRANSPORT
+    config WIFI_AUTO_PROV_TRANSPORT
         string
-        default "ble" if AUTO_WIFI_PROV_TYPE_BLE
-        default "softap" if AUTO_WIFI_PROV_TYPE_SOFT_AP
+        default "ble" if WIFI_AUTO_PROV_TYPE_BLE
+        default "softap" if WIFI_AUTO_PROV_TYPE_SOFT_AP
 
-    config AUTO_WIFI_PROV_QRCODE_URL
+    config WIFI_AUTO_PROV_QRCODE_URL
         string "QR Code URL"
         default "https://espressif.github.io/esp-jumpstart/qrcode.html"
         help

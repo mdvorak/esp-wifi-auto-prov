@@ -1,18 +1,18 @@
-#include "auto_wifi_prov.h"
-#include "auto_wifi_prov_defs.h"
+#include "wifi_auto_prov.h"
+#include "wifi_auto_prov_defs.h"
 #include <esp_app_format.h>
 #include <esp_log.h>
 #include <esp_ota_ops.h>
 #include <esp_wifi.h>
 #include <string.h>
 
-#if AUTO_WIFI_PROV_TYPE_BLE
+#if WIFI_AUTO_PROV_TYPE_BLE
 #include <wifi_provisioning/scheme_ble.h>
-#elif AUTO_WIFI_PROV_TYPE_SOFT_AP
+#elif WIFI_AUTO_PROV_TYPE_SOFT_AP
 #include <wifi_provisioning/scheme_softap.h>
 #endif
 
-static const char TAG[] = "auto_wifi_prov";
+static const char TAG[] = "wifi_auto_prov";
 
 #define POP_LEN (9)
 #define SERVICE_NAME_LEN (28)
@@ -28,7 +28,7 @@ static const char TAG[] = "auto_wifi_prov";
 static esp_timer_handle_t wifi_prov_timeout_timer = NULL;
 static wifi_config_t startup_wifi_config = {};
 static wifi_prov_security_t security = WIFI_PROV_SECURITY_1;
-static auto_wifi_prov_connect_fn wifi_connect = NULL;
+static wifi_auto_prov_connect_fn wifi_connect = NULL;
 static char *pop = NULL;
 static char *service_name = NULL;
 
@@ -154,7 +154,7 @@ static esp_err_t service_name_init()
     return ESP_OK;
 }
 
-esp_err_t auto_wifi_prov_init(const struct auto_wifi_prov_config *config)
+esp_err_t wifi_auto_prov_init(const struct wifi_auto_prov_config *config)
 {
     if (config == NULL)
     {
@@ -204,16 +204,16 @@ exit:
     return err;
 }
 
-esp_err_t auto_wifi_prov_start(bool force_provisioning)
+esp_err_t wifi_auto_prov_start(bool force_provisioning)
 {
     esp_err_t err = ESP_OK;
 
     // Initialize provisioning
     wifi_prov_mgr_config_t wifi_prof_cfg = {
-#if AUTO_WIFI_PROV_TYPE_BLE
+#if WIFI_AUTO_PROV_TYPE_BLE
         .scheme = wifi_prov_scheme_ble,
         .scheme_event_handler = WIFI_PROV_SCHEME_BLE_EVENT_HANDLER_FREE_BTDM,
-#elif AUTO_WIFI_PROV_TYPE_SOFT_AP
+#elif WIFI_AUTO_PROV_TYPE_SOFT_AP
         .scheme = wifi_prov_scheme_softap,
         .scheme_event_handler = WIFI_PROV_EVENT_HANDLER_NONE,
 #endif
@@ -227,9 +227,9 @@ esp_err_t auto_wifi_prov_start(bool force_provisioning)
     if (!provisioned || force_provisioning)
     {
         // Provisioning mode
-        ESP_LOGI(TAG, "provisioning starting, timeout %d s%s", AUTO_WIFI_PROV_TIMEOUT_S, force_provisioning ? " (forced)" : "");
+        ESP_LOGI(TAG, "provisioning starting, timeout %d s%s", WIFI_AUTO_PROV_TIMEOUT_S, force_provisioning ? " (forced)" : "");
 
-#if AUTO_WIFI_PROV_TYPE_SOFT_AP
+#if WIFI_AUTO_PROV_TYPE_SOFT_AP
         esp_netif_create_default_wifi_ap();
 #endif
 
@@ -253,7 +253,7 @@ esp_err_t auto_wifi_prov_start(bool force_provisioning)
             .name = "wifi_prov_timeout",
         };
         HANDLE_ERROR(err = esp_timer_create(&args, &wifi_prov_timeout_timer), goto exit);
-        HANDLE_ERROR(err = esp_timer_start_once(wifi_prov_timeout_timer, AUTO_WIFI_PROV_TIMEOUT_S * 1000000), goto exit);
+        HANDLE_ERROR(err = esp_timer_start_once(wifi_prov_timeout_timer, WIFI_AUTO_PROV_TIMEOUT_S * 1000000), goto exit);
     }
     else
     {
@@ -274,17 +274,17 @@ exit:
     return err;
 }
 
-const char *auto_wifi_prov_get_prov_pop()
+const char *wifi_auto_prov_get_prov_pop()
 {
     return pop;
 }
 
-const char *auto_wifi_prov_get_service_name()
+const char *wifi_auto_prov_get_service_name()
 {
     return service_name;
 }
 
-void auto_wifi_prov_print_qrcode_link()
+void wifi_auto_prov_print_qrcode_link()
 {
     const char VER[] = "v1";
     char payload[200] = {};
@@ -293,25 +293,25 @@ void auto_wifi_prov_print_qrcode_link()
         const char *pop_str = pop != NULL ? pop : "";
         // {"ver":"%s","name":"%s","pop":"%s","transport":"%s"}
         snprintf(payload, sizeof(payload), "%%7B%%22ver%%22%%3A%%22%s%%22%%2C%%22name%%22%%3A%%22%s%%22%%2C%%22pop%%22%%3A%%22%s%%22%%2C%%22transport%%22%%3A%%22%s%%22%%7D",
-                 VER, service_name, pop_str, AUTO_WIFI_PROV_TRANSPORT);
+                 VER, service_name, pop_str, WIFI_AUTO_PROV_TRANSPORT);
     }
     else
     {
         // {"ver":"%s","name":"%s","transport":"%s"}
         snprintf(payload, sizeof(payload), "%%7B%%22ver%%22%%3A%%22%s%%22%%2C%%22name%%22%%3A%%22%s%%22%%2C%%22transport%%22%%3A%%22%s%%22%%7D",
-                 VER, service_name, AUTO_WIFI_PROV_TRANSPORT);
+                 VER, service_name, WIFI_AUTO_PROV_TRANSPORT);
     }
     // NOTE print this regardless of log level settings
-    printf("PROVISIONING: To view QR Code, copy paste the URL in a browser:\n%s?data=%s\n", AUTO_WIFI_PROV_QRCODE_URL, payload);
+    printf("PROVISIONING: To view QR Code, copy paste the URL in a browser:\n%s?data=%s\n", WIFI_AUTO_PROV_QRCODE_URL, payload);
 }
 
-static void auto_wifi_prov_print_qrcode_link_handler(__unused void *arg, __unused esp_event_base_t event_base,
+static void wifi_auto_prov_print_qrcode_link_handler(__unused void *arg, __unused esp_event_base_t event_base,
                                                      __unused int32_t event_id, __unused void *event_data)
 {
-    auto_wifi_prov_print_qrcode_link();
+    wifi_auto_prov_print_qrcode_link();
 }
 
-esp_err_t auto_wifi_prov_print_qr_code_handler_register(esp_event_handler_instance_t *context)
+esp_err_t wifi_auto_prov_print_qr_code_handler_register(esp_event_handler_instance_t *context)
 {
-    return esp_event_handler_instance_register(WIFI_PROV_EVENT, WIFI_PROV_START, auto_wifi_prov_print_qrcode_link_handler, NULL, context);
+    return esp_event_handler_instance_register(WIFI_PROV_EVENT, WIFI_PROV_START, wifi_auto_prov_print_qrcode_link_handler, NULL, context);
 }

@@ -1,6 +1,6 @@
-name: "auto_wifi_prov"
+name: "wifi_auto_prov"
 description: WiFi setup and provisioning.
-url: https://github.com/mdvorak/esp-auto-wifi-prov.git
+url: https://github.com/mdvorak/esp-wifi-auto-prov.git
 dependencies:
   idf:
     version: ">=4.2"

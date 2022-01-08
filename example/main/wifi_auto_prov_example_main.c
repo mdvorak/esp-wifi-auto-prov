@@ -19,6 +19,8 @@ void app_main()
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
     // Print PoP on provisioning
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     ESP_ERROR_CHECK(app_wifi_print_qr_code_handler_register(NULL));
 
     // Setup WiFi
@@ -27,6 +29,7 @@ void app_main()
     };
     ESP_ERROR_CHECK(app_wifi_init(&wifi_cfg));
     ESP_ERROR_CHECK(app_wifi_start(true));
+#pragma GCC diagnostic pop
 
     // Setup complete
     ESP_LOGI(TAG, "started");
