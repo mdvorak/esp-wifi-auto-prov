@@ -30,13 +30,13 @@ struct wifi_auto_prov_config
     /**
      * @brief Custom name of the provisioning service.
      *
-     * When unset, it uses esp_app_desc_t.project_name with PROV_ prefix.
+     * When unset, part of device MAC address is used with PROV_ prefix.
      */
     const char *service_name;
     /**
      * @brief Custom proof of possession string.
      *
-     * When unset, device MAC address is used.
+     * When unset, part of device MAC address is used.
      */
     const char *pop;
     /**
