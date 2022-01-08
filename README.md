@@ -53,7 +53,9 @@ CONFIG_BT_NIMBLE_ENABLED=y
 ### Proof of Possession
 
 By default, it uses chip MAC address as Proof of Possession, which is stable. Therefore, QR code can be printed and
-attached to the device.
+attached to the device. 
+
+This is not secure, but easy to use.
 
 ## Development
 
