@@ -1,5 +1,5 @@
-#include "app_wifi.h"
-#include "app_wifi_defs.h"
+#include "wifi_prov.h"
+#include "wifi_prov_defs.h"
 #include <esp_app_format.h>
 #include <esp_log.h>
 #include <esp_ota_ops.h>

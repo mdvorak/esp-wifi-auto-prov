@@ -19,7 +19,7 @@ To reference this library by your project, add it as git submodule, using comman
 git submodule add https://github.com/mdvorak/esp-wifi-prov.git components/app_wifi
 ```
 
-For code usage see the [example](./example/main/app_wifi_example_main.c).
+For code usage see the [example](./example/main/wifi_prov_example_main.c).
 
 ### Configuration
 
@@ -35,7 +35,7 @@ CONFIG_APP_WIFI_PROV_TIMEOUT_S=120
 CONFIG_APP_WIFI_QRCODE_URL="https://espressif.github.io/esp-jumpstart/qrcode.html"
 ```
 
-These values are aslo provided as defines, see [app_wifi_defs.h](./include/app_wifi_defs.h).
+These values are aslo provided as defines, see [app_wifi_defs.h](./include/wifi_prov_defs.h).
 
 ### BLE provisioning
 
