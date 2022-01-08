@@ -40,18 +40,18 @@ struct wifi_auto_prov_config
      */
     const char *pop;
     /**
+     * @brief Function to be used to initiate WiFi connection.
+     *
+     * Default is esp_wifi_connect().
+     */
+    wifi_auto_prov_connect_fn wifi_connect;
+    /**
      * @brief WiFi network hostname.
      *
      * When unset, no hostname is set.
      * Simply wrapper for tcpip_adapter_set_hostname(TCPIP_ADAPTER_IF_STA, hostname).
      */
     __attribute__((deprecated("this is gonna be removed in future versions, use tcpip_adapter_set_hostname instead"))) const char *hostname;
-    /**
-     * @brief Function to be used to initiate WiFi connection.
-     *
-     * Default is esp_wifi_connect().
-     */
-    wifi_auto_prov_connect_fn wifi_connect;
 };
 
 /**
