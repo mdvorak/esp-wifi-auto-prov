@@ -1,6 +1,6 @@
-# esp-app-wifi
+# esp-wifi-prov
 
-![platformio build](https://github.com/mdvorak-iot/esp-app-wifi/workflows/platformio%20build/badge.svg)
+![build](https://github.com/mdvorak/esp-wifi-prov/workflows/build/badge.svg)
 
 Wi-Fi setup and provisioning,
 using [Unified Provisioning](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/provisioning/provisioning.html)
@@ -16,7 +16,7 @@ Phone apps:
 To reference this library by your project, add it as git submodule, using command
 
 ```shell
-git submodule add https://github.com/mdvorak-iot/esp-app-wifi.git components/app_wifi
+git submodule add https://github.com/mdvorak/esp-wifi-prov.git components/app_wifi
 ```
 
 For code usage see the [example](./example/main/app_wifi_example_main.c).

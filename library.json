@@ -1,10 +1,10 @@
 {
-    "name": "esp-app-wifi",
+    "name": "esp-wifi-prov",
     "description": "WiFi setup and provisioning.",
     "keywords": "esp esp32",
     "repository": {
         "type": "git",
-        "url": "https://github.com/mdvorak-iot/esp-app-wifi.git"
+        "url": "https://github.com/mdvorak/esp-wifi-prov.git"
     },
     "authors": [
         {
