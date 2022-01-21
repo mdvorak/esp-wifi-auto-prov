@@ -26,4 +26,11 @@ menu "Auto WiFi Provisioning"
         default "https://espressif.github.io/esp-jumpstart/qrcode.html"
         help
             QR code data are passed as JSON in data URL parameter.
+
+    config WIFI_AUTO_PROV_SERVICE_PREFIX
+        string "Prefix for service name"
+        default "PROV_"
+        help
+            Service name is displayed during provisioning as a device name.
+            This value is ignored when service_name is set manually during config.
 endmenu

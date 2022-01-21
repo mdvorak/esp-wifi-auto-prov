@@ -148,7 +148,7 @@ static esp_err_t service_name_init()
         return err;
 
     // Final name
-    snprintf(service_name, SERVICE_NAME_MAX_LEN, "PROV_%02x%02x", eth_mac[0], eth_mac[1]);
+    snprintf(service_name, SERVICE_NAME_MAX_LEN, "%s%02x%02x", WIFI_AUTO_PROV_SERVICE_PREFIX, eth_mac[0], eth_mac[1]);
     // Truncate
     service_name[SERVICE_NAME_LEN] = '\0';
     return ESP_OK;
