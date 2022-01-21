@@ -1,10 +1,11 @@
+#include <sys/cdefs.h>
 #include <app_wifi.h>
 #include <esp_log.h>
 #include <nvs_flash.h>
 
 static const char TAG[] = "example";
 
-void app_main()
+_Noreturn void app_main()
 {
     // Initialize NVS
     esp_err_t err = nvs_flash_init();
@@ -33,4 +34,10 @@ void app_main()
 
     // Setup complete
     ESP_LOGI(TAG, "started");
+
+    // Run
+    while (true)
+    {
+        vTaskDelay(1);
+    }
 }
