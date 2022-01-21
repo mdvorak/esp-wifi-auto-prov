@@ -89,20 +89,15 @@ static void wifi_prov_event_handler(__unused void *arg, __unused esp_event_base_
         wifi_prov_mgr_deinit();
 
         // When successful, config should be correctly set
-        // On timeout, it needs to be reset manually (probably bug in wifi config stack)
+        // On timeout, it needs to be reset manually (probably bug in wi-fi config stack)
         ESP_ERROR_CHECK_WITHOUT_ABORT(esp_wifi_set_storage(WIFI_STORAGE_FLASH));
         wifi_config_t current_cfg = {};
         ESP_ERROR_CHECK_WITHOUT_ABORT(esp_wifi_get_config(WIFI_IF_STA, &current_cfg));
 
         if (current_cfg.sta.ssid[0] == '\0')
         {
-            ESP_LOGI(TAG, "wifi credentials not found after provisioning, trying startup wifi config");
+            ESP_LOGI(TAG, "wifi credentials not found after provisioning, trying previous wifi config");
             ESP_ERROR_CHECK_WITHOUT_ABORT(esp_wifi_set_config(WIFI_IF_STA, &startup_wifi_config));
-        }
-        else if (startup_wifi_config.sta.ssid[0] == '\0')
-        {
-            // Nothing we can do, no internet connectivity
-            ESP_LOGI(TAG, "no wifi credentials found");
         }
 
         // Connect
@@ -193,7 +188,7 @@ esp_err_t wifi_auto_prov_init(const struct wifi_auto_prov_config *config)
     }
 
     // Store original STA config, so it can be used on provisioning timeout
-    // Note: This is needed, since wifi stack is unable to re-read correct config from NVS after provisioning for some reason
+    // Note: This is needed, since wi-fi stack is unable to re-read correct config from NVS after provisioning for some reason
     HANDLE_ERROR(err = esp_wifi_get_config(WIFI_IF_STA, &startup_wifi_config), goto exit);
 
     // Listen for events
