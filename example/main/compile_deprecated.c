@@ -1,13 +1,13 @@
 #include <esp_log.h>
 #include <nvs_flash.h>
 #include <sys/cdefs.h>
-#include <wifi_auto_prov.h>
+
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#include <app_wifi.h>
 
 static const char TAG[] = "example";
 
-void compile_deprecated();
-
-_Noreturn void app_main()
+void compile_deprecated()
 {
     // Initialize NVS
     esp_err_t err = nvs_flash_init();
@@ -22,21 +22,15 @@ _Noreturn void app_main()
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
     // Print PoP on provisioning
-    ESP_ERROR_CHECK(wifi_auto_prov_print_qr_code_handler_register(NULL));
+    ESP_ERROR_CHECK(app_wifi_print_qr_code_handler_register(NULL));
 
     // Setup WiFi
-    struct wifi_auto_prov_config wifi_cfg = {
+    struct app_wifi_config wifi_cfg = {
         .security = WIFI_PROV_SECURITY_1,
     };
-    ESP_ERROR_CHECK(wifi_auto_prov_init(&wifi_cfg));
-    ESP_ERROR_CHECK(wifi_auto_prov_start(true));
+    ESP_ERROR_CHECK(app_wifi_init(&wifi_cfg));
+    ESP_ERROR_CHECK(app_wifi_start(true));
 
     // Setup complete
     ESP_LOGI(TAG, "started");
-
-    // Run
-    while (true)
-    {
-        vTaskDelay(1);
-    }
 }
