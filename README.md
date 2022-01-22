@@ -69,8 +69,6 @@ cd example/
 idf.py menuconfig
 ```
 
-and select `Application configuration` in root menu and configure server URL.
-
 Flash it via (in the example dir)
 
 ```
