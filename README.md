@@ -1,6 +1,6 @@
 # wifi_auto_prov
 
-![build](https://github.com/mdvorak/esp-wifi-auto-prov/workflows/build/badge.svg)
+[![build](https://github.com/mdvorak/esp-wifi-auto-prov/actions/workflows/build.yml/badge.svg)](https://github.com/mdvorak/esp-wifi-auto-prov/actions/workflows/build.yml)
 
 Wi-Fi setup and provisioning,
 using [Unified Provisioning](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/provisioning/provisioning.html)
