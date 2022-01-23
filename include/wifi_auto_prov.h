@@ -118,6 +118,23 @@ void wifi_auto_prov_print_qrcode_link();
  */
 esp_err_t wifi_auto_prov_print_qr_code_handler_register(esp_event_handler_instance_t *context);
 
+/**
+ * @brief Generate service name into given buffer.
+ * Name always have suffix of the first bytes of Wi-Fi MAC address.
+ *
+ * This can be used to generate custom service_name and/or hostname.
+ * If the result is larger then prefix+service_name, it will be cut-off during provisioning.
+ *
+ * Setting include_prefix might be useful when using this value for both service_name and hostname.
+ *
+ * @param dst Destination buffer. Cannot be NULL.
+ * @param dst_len Destination buffer size.
+ * @param friendly_name Friendly service name. Can be NULL or empty string.
+ * @param include_prefix Flag whether include WIFI_AUTO_PROV_SERVICE_PREFIX in the resulting string.
+ * @return
+ */
+esp_err_t wifi_auto_prov_generate_name(char *dst, size_t dst_len, const char *friendly_name, bool include_prefix);
+
 #ifdef __cplusplus
 }
 #endif

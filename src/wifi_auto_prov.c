@@ -14,9 +14,7 @@
 
 static const char TAG[] = "wifi_auto_prov";
 
-#define POP_LEN (9)
-#define SERVICE_NAME_LEN (28)
-#define SERVICE_NAME_MAX_LEN (32 + 5)
+#define DEFAULT_POP_LEN (9)
 
 #define HANDLE_ERROR(expr, action)      \
     {                                   \
@@ -119,16 +117,21 @@ static esp_err_t device_pop_init()
     if (err != ESP_OK)
         return err;
 
-    pop = calloc(POP_LEN, sizeof(char));
+    pop = calloc(DEFAULT_POP_LEN, sizeof(char));
     if (!pop)
         return ESP_ERR_NO_MEM;
 
-    snprintf(pop, POP_LEN, "%02x%02x%02x%02x", eth_mac[2], eth_mac[3], eth_mac[4], eth_mac[5]);
+    snprintf(pop, DEFAULT_POP_LEN, "%02x%02x%02x%02x", eth_mac[2], eth_mac[3], eth_mac[4], eth_mac[5]);
     return ESP_OK;
 }
 
 static esp_err_t set_service_name(const char *new_name)
 {
+    if (service_name)
+    {
+        free(service_name);
+    }
+
     if (strncmp(WIFI_AUTO_PROV_SERVICE_PREFIX, new_name, strlen(WIFI_AUTO_PROV_SERVICE_PREFIX)) == 0)
     {
         // Prefix is already present, just copy the string
@@ -138,9 +141,9 @@ static esp_err_t set_service_name(const char *new_name)
     else
     {
         // Prepend prefix to the string
-        service_name = calloc(SERVICE_NAME_MAX_LEN, sizeof(char));
-        int s = snprintf(service_name, SERVICE_NAME_MAX_LEN, "%s%s", WIFI_AUTO_PROV_SERVICE_PREFIX, new_name);
-        if (s >= 0 && s < SERVICE_NAME_MAX_LEN)
+        service_name = calloc(WIFI_AUTO_PROV_SERVICE_NAME_LEN, sizeof(char));
+        int s = snprintf(service_name, WIFI_AUTO_PROV_SERVICE_NAME_LEN, "%s%s", WIFI_AUTO_PROV_SERVICE_PREFIX, new_name);
+        if (s >= 0 && s < WIFI_AUTO_PROV_SERVICE_NAME_LEN)
         {
             return ESP_OK;
         }
@@ -155,25 +158,13 @@ static esp_err_t service_name_init()
     if (service_name) return ESP_OK;
 
     // Allocate
-    service_name = calloc(SERVICE_NAME_MAX_LEN, sizeof(char));
+    service_name = calloc(WIFI_AUTO_PROV_SERVICE_NAME_LEN, sizeof(char));
     if (!service_name)
-        return ESP_ERR_NO_MEM;
-
-    // Read MAC
-    uint8_t eth_mac[6];
-    esp_err_t err = esp_wifi_get_mac(WIFI_IF_STA, eth_mac);
-    if (err != ESP_OK)
-        return err;
-
-    // Final name
-    int s = snprintf(service_name, SERVICE_NAME_MAX_LEN, "%s%02x%02x", WIFI_AUTO_PROV_SERVICE_PREFIX, eth_mac[0], eth_mac[1]);
-    if (s >= 0 && s < SERVICE_NAME_MAX_LEN)
     {
-        return ESP_OK;
+        return ESP_ERR_NO_MEM;
     }
 
-    ESP_LOGW(TAG, "failed to generate service name");
-    return ESP_FAIL;
+    return wifi_auto_prov_generate_name(service_name, WIFI_AUTO_PROV_SERVICE_NAME_LEN, NULL, true);
 }
 
 esp_err_t wifi_auto_prov_init(const struct wifi_auto_prov_config *config)
@@ -211,6 +202,7 @@ esp_err_t wifi_auto_prov_init(const struct wifi_auto_prov_config *config)
     }
     if (config->pop)
     {
+        if (pop) free(pop);
         pop = strdup(config->pop);
     }
 
@@ -336,4 +328,32 @@ static void wifi_auto_prov_print_qrcode_link_handler(__unused void *arg, __unuse
 esp_err_t wifi_auto_prov_print_qr_code_handler_register(esp_event_handler_instance_t *context)
 {
     return esp_event_handler_instance_register(WIFI_PROV_EVENT, WIFI_PROV_START, wifi_auto_prov_print_qrcode_link_handler, NULL, context);
+}
+
+esp_err_t wifi_auto_prov_generate_name(char *dst, size_t dst_len, const char *friendly_name, bool include_prefix)
+{
+    if (dst == NULL || dst_len < 5) // NOTE suffix is always at least 4+NULL bytes
+    {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    // Read MAC
+    uint8_t eth_mac[6];
+    esp_err_t err = esp_wifi_get_mac(WIFI_IF_STA, eth_mac);
+    if (err != ESP_OK)
+        return err;
+
+    // Final name
+    const char *prefix = include_prefix ? WIFI_AUTO_PROV_SERVICE_PREFIX : "";
+    const char *name = friendly_name ? friendly_name : "";
+    const char *name_suffix = strnlen(name, 1) ? "_" : "";
+
+    int s = snprintf(dst, dst_len, "%s%s%s%02x%02x", prefix, name, name_suffix, eth_mac[0], eth_mac[1]);
+    if (s >= 0 && s < dst_len)
+    {
+        return ESP_OK;
+    }
+
+    // Did not fit the buffer
+    return ESP_FAIL;
 }

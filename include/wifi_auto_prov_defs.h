@@ -28,3 +28,15 @@
 #ifndef WIFI_AUTO_PROV_SERVICE_PREFIX
 #define WIFI_AUTO_PROV_SERVICE_PREFIX CONFIG_WIFI_AUTO_PROV_SERVICE_PREFIX
 #endif
+
+#if CONFIG_APP_WIFI_PROV_TYPE_BLE
+/**
+ * @brief Maximum length of service name, including terminating NULL character.
+ */
+#define WIFI_AUTO_PROV_SERVICE_NAME_LEN 29
+#else
+/**
+ * @brief Maximum length of service name, including terminating NULL character.
+ */
+#define WIFI_AUTO_PROV_SERVICE_NAME_LEN 33
+#endif
