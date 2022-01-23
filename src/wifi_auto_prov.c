@@ -113,7 +113,7 @@ static esp_err_t device_pop_init()
     if (pop) return ESP_OK;
 
     uint8_t eth_mac[6];
-    esp_err_t err = esp_wifi_get_mac(WIFI_IF_STA, eth_mac);
+    esp_err_t err = esp_efuse_mac_get_default(eth_mac);
     if (err != ESP_OK)
         return err;
 
@@ -339,7 +339,7 @@ esp_err_t wifi_auto_prov_generate_name(char *dst, size_t dst_len, const char *fr
 
     // Read MAC
     uint8_t eth_mac[6];
-    esp_err_t err = esp_wifi_get_mac(WIFI_IF_STA, eth_mac);
+    esp_err_t err = esp_efuse_mac_get_default(eth_mac);
     if (err != ESP_OK)
         return err;
 
