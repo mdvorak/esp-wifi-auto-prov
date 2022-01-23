@@ -29,6 +29,7 @@ struct wifi_auto_prov_config
     wifi_prov_security_t security;
     /**
      * @brief Custom name of the provisioning service.
+     * WIFI_AUTO_PROV_SERVICE_PREFIX will be prepended to this name automatically, if needed.
      *
      * When unset, part of device MAC address is used with PROV_ prefix.
      */

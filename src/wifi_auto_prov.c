@@ -127,6 +127,28 @@ static esp_err_t device_pop_init()
     return ESP_OK;
 }
 
+static esp_err_t set_service_name(const char *new_name)
+{
+    if (strncmp(WIFI_AUTO_PROV_SERVICE_PREFIX, new_name, strlen(WIFI_AUTO_PROV_SERVICE_PREFIX)) == 0)
+    {
+        // Prefix is already present, just copy the string
+        service_name = strdup(new_name);
+    }
+    else
+    {
+        // Prepend prefix to the string
+        service_name = calloc(SERVICE_NAME_MAX_LEN, sizeof(char));
+        int s = snprintf(service_name, SERVICE_NAME_MAX_LEN, "%s%s", WIFI_AUTO_PROV_SERVICE_PREFIX, new_name);
+        if (s >= 0 && s < SERVICE_NAME_MAX_LEN)
+        {
+            return ESP_OK;
+        }
+
+        ESP_LOGW(TAG, "failed to format service name");
+        return ESP_FAIL;
+    }
+}
+
 static esp_err_t service_name_init()
 {
     if (service_name) return ESP_OK;
@@ -149,7 +171,7 @@ static esp_err_t service_name_init()
         return ESP_OK;
     }
 
-    ESP_LOGW(TAG, "failed to format service name");
+    ESP_LOGW(TAG, "failed to generate service name");
     return ESP_FAIL;
 }
 
@@ -184,7 +206,7 @@ esp_err_t wifi_auto_prov_init(const struct wifi_auto_prov_config *config)
     wifi_connect = config->wifi_connect ? config->wifi_connect : esp_wifi_connect; // If not set, use esp_wifi_connect()
     if (config->service_name)
     {
-        service_name = strdup(config->service_name);
+        set_service_name(config->service_name);
     }
     if (config->pop)
     {
