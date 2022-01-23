@@ -25,9 +25,7 @@ _Noreturn void app_main()
     ESP_ERROR_CHECK(wifi_auto_prov_print_qr_code_handler_register(NULL));
 
     // Setup WiFi
-    struct wifi_auto_prov_config wifi_cfg = {
-        .security = WIFI_PROV_SECURITY_1,
-    };
+    struct wifi_auto_prov_config wifi_cfg = WIFI_AUTO_PROV_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(wifi_auto_prov_init(&wifi_cfg));
     ESP_ERROR_CHECK(wifi_auto_prov_start(true));
 

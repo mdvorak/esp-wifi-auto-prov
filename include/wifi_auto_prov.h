@@ -56,6 +56,17 @@ struct wifi_auto_prov_config
 };
 
 /**
+ * @brief Use this to initialize struct wifi_auto_prov_config.
+ */
+#define WIFI_AUTO_PROV_CONFIG_DEFAULT()   \
+    {                                     \
+        .security = WIFI_PROV_SECURITY_1, \
+        .service_name = NULL,             \
+        .pop = NULL,                      \
+        .wifi_connect = NULL,             \
+    }
+
+/**
  * @brief Initialize WiFi. WiFi is not started yet by this command.
  *
  * To start the WiFi, call wifi_auto_prov_start().
