@@ -25,8 +25,13 @@ _Noreturn void app_main()
     ESP_ERROR_CHECK(wifi_auto_prov_print_qr_code_handler_register(NULL));
 
     // Setup WiFi
+    char name[WIFI_AUTO_PROV_SERVICE_NAME_LEN];
+    ESP_ERROR_CHECK(wifi_auto_prov_generate_name(name, sizeof(name), "Example", false));
+
     struct wifi_auto_prov_config wifi_cfg = WIFI_AUTO_PROV_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(wifi_auto_prov_init(&wifi_cfg));
+    ESP_ERROR_CHECK(wifi_auto_prov_set_service_name(name));
+    ESP_ERROR_CHECK(tcpip_adapter_set_hostname(TCPIP_ADAPTER_IF_STA, name));
     ESP_ERROR_CHECK(wifi_auto_prov_start(true));
 
     // Setup complete

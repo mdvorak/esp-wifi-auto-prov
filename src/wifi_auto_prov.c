@@ -125,8 +125,22 @@ static esp_err_t device_pop_init()
     return ESP_OK;
 }
 
-static esp_err_t set_service_name(const char *new_name)
+esp_err_t wifi_auto_prov_set_pop(const char *new_pop)
 {
+    if (new_pop == NULL) return ESP_ERR_INVALID_ARG;
+
+    if (pop)
+    {
+        free(pop);
+    }
+    pop = strdup(new_pop);
+    return ESP_OK;
+}
+
+esp_err_t wifi_auto_prov_set_service_name(const char *new_name)
+{
+    if (new_name == NULL) return ESP_ERR_INVALID_ARG;
+
     if (service_name)
     {
         free(service_name);
@@ -198,12 +212,11 @@ esp_err_t wifi_auto_prov_init(const struct wifi_auto_prov_config *config)
     wifi_connect = config->wifi_connect ? config->wifi_connect : esp_wifi_connect; // If not set, use esp_wifi_connect()
     if (config->service_name && strnlen(config->service_name, 1))
     {
-        set_service_name(config->service_name);
+        HANDLE_ERROR(err = wifi_auto_prov_set_service_name(config->service_name), goto exit);
     }
     if (config->pop && strnlen(config->pop, 1))
     {
-        if (pop) free(pop);
-        pop = strdup(config->pop);
+        HANDLE_ERROR(err = wifi_auto_prov_set_pop(config->pop), goto exit);
     }
 
     // Store original STA config, so it can be used on provisioning timeout
