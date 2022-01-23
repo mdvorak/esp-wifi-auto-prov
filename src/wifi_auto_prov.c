@@ -133,6 +133,7 @@ static esp_err_t set_service_name(const char *new_name)
     {
         // Prefix is already present, just copy the string
         service_name = strdup(new_name);
+        return ESP_OK;
     }
     else
     {
