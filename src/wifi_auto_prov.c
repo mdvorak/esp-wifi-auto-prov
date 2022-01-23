@@ -143,10 +143,14 @@ static esp_err_t service_name_init()
         return err;
 
     // Final name
-    snprintf(service_name, SERVICE_NAME_MAX_LEN, "%s%02x%02x", WIFI_AUTO_PROV_SERVICE_PREFIX, eth_mac[0], eth_mac[1]);
-    // Truncate
-    service_name[SERVICE_NAME_LEN] = '\0';
-    return ESP_OK;
+    int s = snprintf(service_name, SERVICE_NAME_MAX_LEN, "%s%02x%02x", WIFI_AUTO_PROV_SERVICE_PREFIX, eth_mac[0], eth_mac[1]);
+    if (s >= 0 && s < SERVICE_NAME_MAX_LEN)
+    {
+        return ESP_OK;
+    }
+
+    ESP_LOGW(TAG, "failed to format service name");
+    return ESP_FAIL;
 }
 
 esp_err_t wifi_auto_prov_init(const struct wifi_auto_prov_config *config)
