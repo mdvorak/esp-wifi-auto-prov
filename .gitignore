@@ -1,3 +1,5 @@
+managed_components/
+dist/
 .pio/
 .vscode/
 .idea/
