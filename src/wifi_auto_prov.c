@@ -196,11 +196,11 @@ esp_err_t wifi_auto_prov_init(const struct wifi_auto_prov_config *config)
     // Copy provision params
     security = config->security;
     wifi_connect = config->wifi_connect ? config->wifi_connect : esp_wifi_connect; // If not set, use esp_wifi_connect()
-    if (config->service_name)
+    if (config->service_name && strnlen(config->service_name, 1))
     {
         set_service_name(config->service_name);
     }
-    if (config->pop)
+    if (config->pop && strnlen(config->pop, 1))
     {
         if (pop) free(pop);
         pop = strdup(config->pop);
