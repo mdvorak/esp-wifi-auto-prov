@@ -1,4 +1,4 @@
-menu "Auto WiFi Provisioning"
+menu "Wi-Fi Auto Provisioning"
     choice WIFI_AUTO_PROV_MODE
         prompt "WiFi provisioning mode"
         default WIFI_AUTO_PROV_TYPE_BLE
