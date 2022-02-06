@@ -70,6 +70,10 @@ jobs:
           echo "CONFIG_WIFI_AUTO_PROV_TYPE_BLE=${{ matrix.mode.CONFIG_WIFI_AUTO_PROV_TYPE_BLE }}" >> sdkconfig
           echo "CONFIG_WIFI_AUTO_PROV_TYPE_SOFT_AP=${{ matrix.mode.CONFIG_WIFI_AUTO_PROV_TYPE_SOFT_AP }}" >> sdkconfig
           echo "CONFIG_BT_ENABLED=${{ matrix.mode.CONFIG_BT_ENABLED }}" >> sdkconfig
+          echo "CONFIG_WIFI_AUTO_PROV_SCHEME_EVENT_HANDLER_FREE_BTDM=${{ matrix.mode.CONFIG_WIFI_AUTO_PROV_SCHEME_EVENT_HANDLER_FREE_BTDM }}" >> sdkconfig
+          echo "CONFIG_WIFI_AUTO_PROV_SCHEME_EVENT_HANDLER_FREE_BLE=${{ matrix.mode.CONFIG_WIFI_AUTO_PROV_SCHEME_EVENT_HANDLER_FREE_BLE }}" >> sdkconfig
+          echo "CONFIG_WIFI_AUTO_PROV_SCHEME_EVENT_HANDLER_FREE_BT=${{ matrix.mode.CONFIG_WIFI_AUTO_PROV_SCHEME_EVENT_HANDLER_FREE_BT }}" >> sdkconfig
+          echo "CONFIG_WIFI_AUTO_PROV_SCHEME_EVENT_HANDLER_NONE=${{ matrix.mode.CONFIG_WIFI_AUTO_PROV_SCHEME_EVENT_HANDLER_NONE }}" >> sdkconfig
           
           . ${IDF_PATH}/export.sh
           idf.py build
