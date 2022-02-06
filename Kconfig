@@ -33,4 +33,24 @@ menu "Wi-Fi Auto Provisioning"
         help
             Service name is displayed during provisioning as a device name.
             This value is ignored when service_name is set manually during config.
+
+    choice WIFI_AUTO_PROV_SCHEME_EVENT_HANDLER
+        prompt "Provisioning scheme event handler"
+        default WIFI_AUTO_PROV_SCHEME_EVENT_HANDLER_FREE_BTDM if WIFI_AUTO_PROV_TYPE_BLE
+        default WIFI_AUTO_PROV_SCHEME_EVENT_HANDLER_NONE if !WIFI_AUTO_PROV_TYPE_BLE
+
+        config WIFI_AUTO_PROV_SCHEME_EVENT_HANDLER_NONE
+            bool "WIFI_PROV_EVENT_HANDLER_NONE"
+        config WIFI_AUTO_PROV_SCHEME_EVENT_HANDLER_FREE_BTDM
+            bool "WIFI_PROV_SCHEME_BLE_EVENT_HANDLER_FREE_BTDM"
+        config WIFI_AUTO_PROV_SCHEME_EVENT_HANDLER_FREE_BLE
+            bool "WIFI_AUTO_PROV_SCHEME_EVENT_HANDLER_FREE_BLE"
+        config WIFI_PROV_SCHEME_BLE_EVENT_HANDLER_FREE_BT
+            bool "WIFI_PROV_SCHEME_BLE_EVENT_HANDLER_FREE_BT"
+
+        help
+            By default, BLE resources are released after provisioning is complete.
+            If you need BLE to be used by the app, set this to other value.
+            To disable, set it to WIFI_PROV_EVENT_HANDLER_NONE.
+    endchoice
 endmenu

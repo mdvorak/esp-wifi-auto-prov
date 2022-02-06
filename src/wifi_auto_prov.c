@@ -239,10 +239,10 @@ esp_err_t wifi_auto_prov_start(bool force_provisioning)
     wifi_prov_mgr_config_t wifi_prof_cfg = {
 #if WIFI_AUTO_PROV_TYPE_BLE
         .scheme = wifi_prov_scheme_ble,
-        .scheme_event_handler = WIFI_PROV_SCHEME_BLE_EVENT_HANDLER_FREE_BTDM,
+        .scheme_event_handler = WIFI_AUTO_PROV_SCHEME_EVENT_HANDLER,
 #elif WIFI_AUTO_PROV_TYPE_SOFT_AP
         .scheme = wifi_prov_scheme_softap,
-        .scheme_event_handler = WIFI_PROV_EVENT_HANDLER_NONE,
+        .scheme_event_handler = WIFI_AUTO_PROV_SCHEME_EVENT_HANDLER,
 #endif
     };
     HANDLE_ERROR(err = wifi_prov_mgr_init(wifi_prof_cfg), goto exit);
